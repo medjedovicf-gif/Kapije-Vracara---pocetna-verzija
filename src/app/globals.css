@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-cream text-ink;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 font-sans font-bold text-sm rounded-full px-5 py-3 transition active:scale-[0.97];
+  }
+  .btn-gold {
+    @apply bg-gold text-navy-950 hover:brightness-105;
+  }
+  .btn-navy {
+    @apply bg-navy-950 text-white hover:brightness-125;
+  }
+  .btn-outline {
+    @apply bg-white text-navy-950 border border-line hover:border-navy-950;
+  }
+  .card {
+    @apply bg-white rounded-md shadow-card border border-line p-5;
+  }
+  .tag {
+    @apply font-mono text-[10px] tracking-wide uppercase px-2.5 py-1 rounded-full font-semibold whitespace-nowrap;
+  }
+  .tag-sage {
+    @apply bg-sage-soft text-sage-dark;
+  }
+  .tag-gold {
+    @apply bg-[#FBEFD3] text-gold-dark;
+  }
+  .tag-brick {
+    @apply bg-brick-soft text-brick;
+  }
+  .field-label {
+    @apply block text-[11.5px] font-bold text-ink-soft mb-1.5;
+  }
+  .field-input {
+    @apply w-full px-3.5 py-2.5 rounded-[10px] border border-line bg-white text-sm text-ink focus:outline-none focus:border-navy-950;
+  }
+}
