@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { revalidatePath } from 'next/cache';
+import { siteOrigin } from '@/lib/site-url';
 import type { Profile } from '@/lib/types';
 
 async function requireStaff() {
@@ -32,21 +33,29 @@ export async function addResident(formData: FormData) {
   const buildingId = me.role === 'superadmin' ? String(formData.get('building_id') || '') : me.building_id;
 
   if (!name || !unit || !buildingId) return { error: 'Unesite ime, stan i zgradu.' };
+  // Profil mora da pripada nalogu (profiles.id -> auth.users), pa je email obavezan.
+  if (!email) return { error: 'Unesite email stanara (potreban je za nalog i pozivnicu).' };
+  if (password && password.length < 8) return { error: 'Lozinka mora imati najmanje 8 karaktera, ili je ostavite praznu za pozivnicu.' };
 
-  let userId: string | null = null;
+  const admin = createAdminClient();
+  let userId: string;
+  let invited = false;
 
-  if (email && password) {
-    const admin = createAdminClient();
-    const { data: created, error: createError } = await admin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-    });
+  if (password) {
+    // Admin postavlja lozinku odmah.
+    const { data: created, error: createError } = await admin.auth.admin.createUser({ email, password, email_confirm: true });
     if (createError) return { error: `Nalog nije kreiran: ${createError.message}` };
     userId = created.user.id;
   } else {
-    // Bez naloga za prijavu — samo evidencija u profiles (koristi generisan id, bez auth naloga)
-    userId = crypto.randomUUID();
+    // Pozivnica: stanar dobija email i sam postavlja lozinku.
+    const origin = await siteOrigin();
+    const { data: invitedUser, error: inviteError } = await admin.auth.admin.inviteUserByEmail(email, {
+      redirectTo: `${origin}/auth/callback?next=/reset-password`,
+      data: { name },
+    });
+    if (inviteError) return { error: `Pozivnica nije poslata: ${inviteError.message}` };
+    userId = invitedUser.user.id;
+    invited = true;
   }
 
   const { error: profileError } = await supabase.from('profiles').insert({
@@ -58,11 +67,15 @@ export async function addResident(formData: FormData) {
     balance,
     payment_status: 'Na čekanju',
   } as never);
-  if (profileError) return { error: `Greška pri čuvanju profila: ${profileError.message}` };
+  if (profileError) {
+    // Ne ostavljaj nalog bez profila.
+    await admin.auth.admin.deleteUser(userId);
+    return { error: `Greška pri čuvanju profila: ${profileError.message}` };
+  }
 
   revalidatePath('/admin/residents');
   revalidatePath('/super-admin/residents');
-  return { success: true };
+  return { success: true, invited };
 }
 
 export async function deleteResident(profileId: string) {

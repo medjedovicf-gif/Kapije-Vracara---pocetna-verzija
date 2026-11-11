@@ -82,15 +82,18 @@ export function AddResidentButton({ buildingId, buildings }: { buildingId?: stri
                 <label className="field-label">Početno stanje (RSD)</label>
                 <input name="balance" type="number" className="field-input" placeholder="0" />
               </div>
-              <p className="font-mono text-[11px] tracking-wide uppercase text-ink-faint mt-4 mb-2">Pristup za prijavu (opciono)</p>
+              <p className="font-mono text-[11px] tracking-wide uppercase text-ink-faint mt-4 mb-2">Pristup za prijavu</p>
               <div className="mb-3">
                 <label className="field-label">Email</label>
-                <input name="email" type="email" className="field-input" placeholder="ime@primer.rs" />
+                <input name="email" type="email" required autoComplete="off" className="field-input" placeholder="ime@primer.rs" />
               </div>
-              <div className="mb-4">
-                <label className="field-label">Lozinka</label>
-                <input name="password" type="text" className="field-input" placeholder="lozinka" />
+              <div className="mb-1.5">
+                <label className="field-label">Lozinka (opciono)</label>
+                <input name="password" type="text" minLength={8} autoComplete="off" className="field-input" placeholder="Ostavite prazno za pozivnicu" />
               </div>
+              <p className="text-[11px] text-ink-soft mb-4 leading-snug">
+                Bez lozinke stanar dobija <strong>pozivnicu emailom</strong> i sam postavlja lozinku. Sa lozinkom nalog radi odmah.
+              </p>
               {error && <p className="text-brick text-xs mb-3">{error}</p>}
               <div className="flex gap-2.5">
                 <button type="button" onClick={() => setOpen(false)} className="btn btn-outline flex-1">Otkaži</button>
