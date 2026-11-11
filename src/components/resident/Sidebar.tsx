@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutGrid, Wallet, Car, Wrench, Megaphone, LogOut, Building2, Settings } from 'lucide-react';
+import { LayoutGrid, Wallet, Car, Wrench, Megaphone, LogOut, Building2, Settings, CalendarDays, FileText } from 'lucide-react';
 import { GateMark } from '@/components/GateMark';
 import { logout } from '@/app/actions/auth';
 
@@ -12,6 +12,8 @@ const NAV = [
   { href: '/mobility', label: 'Mobilnost', icon: Car },
   { href: '/services', label: 'Servisni centar', icon: Wrench },
   { href: '/bulletin', label: 'Oglasna tabla', icon: Megaphone },
+  { href: '/reservations', label: 'Rezervacije', icon: CalendarDays },
+  { href: '/documents', label: 'Dokumenti', icon: FileText },
   { href: '/building', label: 'Moja zgrada', icon: Building2 },
   { href: '/settings', label: 'Podešavanja', icon: Settings },
 ];

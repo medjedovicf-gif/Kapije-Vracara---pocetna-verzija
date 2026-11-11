@@ -182,6 +182,48 @@ export interface PushSubscriptionRow {
   created_at: string;
 }
 
+export const DOCUMENT_CATEGORIES = ['Zapisnik', 'Ugovor', 'Pravilnik', 'Račun', 'Obaveštenje', 'Ostalo'] as const;
+
+export interface BuildingDocument {
+  id: number;
+  building_id: string;
+  title: string;
+  category: (typeof DOCUMENT_CATEGORIES)[number];
+  storage_path: string;
+  file_name: string;
+  mime_type: string | null;
+  size_bytes: number | null;
+  visible_to_residents: boolean;
+  uploaded_by: string | null;
+  created_at: string;
+}
+
+export interface CommonSpace {
+  id: number;
+  building_id: string;
+  name: string;
+  description: string | null;
+  requires_approval: boolean;
+  max_hours: number;
+  active: boolean;
+  created_at: string;
+}
+
+export type BookingStatus = 'Na čekanju' | 'Potvrđeno' | 'Odbijeno' | 'Otkazano';
+
+export interface SpaceBooking {
+  id: number;
+  space_id: number;
+  building_id: string;
+  resident_id: string;
+  starts_at: string;
+  ends_at: string;
+  note: string | null;
+  status: BookingStatus;
+  decided_by: string | null;
+  created_at: string;
+}
+
 // Minimalan Database tip da @supabase/ssr klijenti budu tipizirani.
 // Nije 100% kompletan Supabase generated tip, ali dovoljan za select/insert/update sa .from('table').
 type Table<T> = {
@@ -212,6 +254,9 @@ export interface Database {
       permissions: Table<PermissionRow>;
       notifications: Table<AppNotification>;
       push_subscriptions: Table<PushSubscriptionRow>;
+      building_documents: Table<BuildingDocument>;
+      common_spaces: Table<CommonSpace>;
+      space_bookings: Table<SpaceBooking>;
     };
     Views: Record<string, never>;
     Functions: {
