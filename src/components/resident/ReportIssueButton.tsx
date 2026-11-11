@@ -6,7 +6,7 @@ import { createTicket } from '@/app/actions/tickets';
 
 const CATEGORIES = ['Održavanje', 'Vodoinstalacije', 'Elektrika', 'Klima', 'Čišćenje', 'Ostalo'];
 
-export function ReportIssueButton({ presetCategory }: { presetCategory?: string }) {
+export function ReportIssueButton({ presetCategory, compact = false }: { presetCategory?: string; compact?: boolean }) {
   const [open, setOpen] = useState(false);
   const [photos, setPhotos] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
@@ -54,8 +54,11 @@ export function ReportIssueButton({ presetCategory }: { presetCategory?: string 
 
   return (
     <>
-      <button className="btn btn-gold w-full sm:w-auto" onClick={openModal}>
-        <Camera size={15} />
+      <button
+        className={compact ? 'btn btn-gold !px-3.5 !py-2 !text-xs whitespace-nowrap' : 'btn btn-gold w-full sm:w-auto'}
+        onClick={openModal}
+      >
+        <Camera size={compact ? 13 : 15} />
         Prijavi kvar
       </button>
 
