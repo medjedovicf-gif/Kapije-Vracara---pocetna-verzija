@@ -51,7 +51,7 @@ export default async function BulletinPage() {
     <div>
       <p className="text-ink-soft text-sm mb-6 max-w-md">Obaveštenja od administracije zgrade i platforme.</p>
 
-      <div className="grid grid-cols-[1.3fr,1fr] gap-5 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-[1.3fr,1fr] gap-5 items-start">
         <div>
           {!posts?.length && <p className="text-[12.5px] text-ink-soft">Trenutno nema obaveštenja.</p>}
           {(posts ?? []).map((b) => (

@@ -27,13 +27,13 @@ export default async function AdminResidentsPage() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex flex-wrap gap-3 justify-between items-center mb-4">
         <p className="text-ink-soft text-sm">Svi stanovi u vašoj zgradi.</p>
         <AddResidentButton buildingId={me.building_id ?? undefined} />
       </div>
 
       <div className="card">
-        <table className="w-full text-[13px]">
+        <div className="overflow-x-auto"><table className="min-w-[640px] w-full text-[13px]">
           <thead>
             <tr className="text-left font-mono text-[10.5px] uppercase tracking-wide text-ink-faint border-b border-line">
               <th className="pb-2.5 font-semibold">Stan</th>
@@ -59,7 +59,7 @@ export default async function AdminResidentsPage() {
               </tr>
             )}
           </tbody>
-        </table>
+        </table></div>
       </div>
     </div>
   );

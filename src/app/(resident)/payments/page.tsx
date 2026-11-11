@@ -30,7 +30,7 @@ export default async function PaymentsPage() {
         Pratite stanje i istoriju plaćanja za stan {profile.unit}.
       </p>
 
-      <div className="grid grid-cols-[1.1fr,1.4fr] gap-5 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-[1.1fr,1.4fr] gap-5 items-start">
         <div className="rounded-lg bg-gradient-to-br from-navy-950 to-navy-800 text-white p-6">
           <div className="text-xs text-white/60">Trenutno stanje</div>
           <div className="font-display font-semibold text-[34px] mt-1.5">
@@ -49,7 +49,7 @@ export default async function PaymentsPage() {
             <p className="text-[12.5px] text-ink-soft">Još uvek nema faktura za ovaj stan.</p>
           )}
           {!!invoices?.length && (
-            <table className="w-full text-[13px]">
+            <div className="overflow-x-auto"><table className="min-w-[640px] w-full text-[13px]">
               <thead>
                 <tr className="text-left font-mono text-[10.5px] uppercase tracking-wide text-ink-faint border-b border-line">
                   <th className="pb-2.5 font-semibold">Stavka</th>
@@ -81,7 +81,7 @@ export default async function PaymentsPage() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </table></div>
           )}
         </div>
       </div>

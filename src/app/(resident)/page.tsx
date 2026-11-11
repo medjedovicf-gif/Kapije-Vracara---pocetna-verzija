@@ -37,9 +37,9 @@ export default async function HomePage() {
   return (
     <div>
       {/* HERO */}
-      <div className="relative overflow-hidden rounded-lg bg-gradient-to-br from-navy-950 to-navy-800 text-white p-8 mb-6">
+      <div className="relative overflow-hidden rounded-lg bg-gradient-to-br from-navy-950 to-navy-800 text-white p-5 md:p-8 mb-6">
         <div className="absolute -right-16 -top-20 w-72 h-72 rounded-full bg-gold/20 blur-3xl" />
-        <h2 className="relative font-display font-semibold text-[30px] mb-2">Dobrodošao nazad, {firstName} 👋</h2>
+        <h2 className="relative font-display font-semibold text-[24px] md:text-[30px] leading-tight mb-2">Dobrodošao nazad, {firstName} 👋</h2>
         <p className="relative text-white/70 text-[13.5px] max-w-md mb-5">
           Evo pregleda tvog stana — stanje, otvoreni zahtevi i aktivne ankete na jednom mestu.
         </p>
@@ -56,13 +56,13 @@ export default async function HomePage() {
       </div>
 
       {/* STATS */}
-      <div className="grid grid-cols-3 gap-4 mb-7">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-7">
         <StatCard icon={Wallet} label="RSD stanje" value={profile.balance.toLocaleString('de-DE')} tag={profile.payment_status} />
         <StatCard icon={Wrench} label="Otvorenih zahteva" value={String(openTickets ?? 0)} tag={openTickets ? 'U toku' : 'Sve rešeno'} />
         <StatCard icon={Vote} label="Aktivnih anketa" value={String(activePolls ?? 0)} tag="Glasaj" />
       </div>
 
-      <div className="grid grid-cols-4 gap-3 mb-7">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-7">
         <MiniStat label="U obradi" value={String(inProgress ?? 0)} />
         <MiniStat label="Rešeno" value={String(resolvedTickets ?? 0)} />
         <MiniStat label="Nepročitane notifikacije" value={String(unreadNotifications ?? 0)} />
@@ -70,10 +70,10 @@ export default async function HomePage() {
       </div>
 
       <p className="font-mono text-[11px] tracking-wide uppercase text-ink-faint mb-3">Brze akcije</p>
-      <div className="grid grid-cols-3 gap-3 mb-7"><a href="/services" className="btn btn-gold justify-center"><Plus size={15} />Prijavi problem</a><a href="/services" className="btn btn-outline justify-center"><Wrench size={15} />Moje prijave</a><a href="/bulletin" className="btn btn-outline justify-center"><Bell size={15} />Notifikacije</a></div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-7"><a href="/services" className="btn btn-gold justify-center"><Plus size={15} />Prijavi problem</a><a href="/services" className="btn btn-outline justify-center"><Wrench size={15} />Moje prijave</a><a href="/bulletin" className="btn btn-outline justify-center"><Bell size={15} />Notifikacije</a></div>
 
       <p className="font-mono text-[11px] tracking-wide uppercase text-ink-faint mb-3">Brzi pristup</p>
-      <div className="grid grid-cols-3 gap-3.5">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
         <QuickTile href="/services" title="Zakaži majstora" img="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=500&q=60" />
         <QuickTile href="/mobility" title="Zakaži taksi" img="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=500&q=60" />
         <QuickTile href="/bulletin" title="Oglasna tabla" img="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=500&q=60" />

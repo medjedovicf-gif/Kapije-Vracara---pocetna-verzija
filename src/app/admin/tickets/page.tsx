@@ -19,5 +19,5 @@ export default async function AdminTicketsPage() {
     supabase.from('ticket_comments').select('*').returns<TicketComment[]>(),
   ]);
   const units = (people ?? []).filter((p) => p.role === 'resident').map((p) => p.unit).filter((u): u is string => !!u);
-  return <div><div className="flex justify-between items-center mb-5"><div><h2 className="font-display text-2xl font-semibold text-navy-950">Problemi</h2><p className="text-ink-soft text-sm mt-1">Upravljanje problemima, rokovima, prioritetima, dodelama i komentarima.</p></div><NewTicketButton units={units} /></div><ProblemManager tickets={tickets ?? []} residents={people ?? []} comments={comments ?? []} /></div>;
+  return <div><div className="flex flex-wrap gap-3 justify-between items-center mb-5"><div><h2 className="font-display text-2xl font-semibold text-navy-950">Problemi</h2><p className="text-ink-soft text-sm mt-1">Upravljanje problemima, rokovima, prioritetima, dodelama i komentarima.</p></div><NewTicketButton units={units} /></div><ProblemManager tickets={tickets ?? []} residents={people ?? []} comments={comments ?? []} /></div>;
 }

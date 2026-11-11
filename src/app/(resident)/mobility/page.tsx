@@ -37,7 +37,7 @@ export default function MobilityPage() {
         Besprekorna putovanja i kratkoročni boravci, ekskluzivno za stanare zgrade.
       </p>
 
-      <div className="grid grid-cols-2 gap-4.5 mb-7">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4.5 mb-7">
         <div className="card">
           <div className="flex justify-between items-center mb-3">
             <div className="flex items-center gap-2 font-bold text-sm">
@@ -65,7 +65,7 @@ export default function MobilityPage() {
       <div className="flex justify-between items-center mb-3.5">
         <p className="font-mono text-[11px] tracking-wide uppercase text-ink-faint">Izdavanje</p>
       </div>
-      <div className="grid grid-cols-2 gap-4.5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4.5">
         {STAYS.map((s) => (
           <div key={s.name} className="rounded-md overflow-hidden bg-white border border-line shadow-card">
             <div className="relative h-[170px]">

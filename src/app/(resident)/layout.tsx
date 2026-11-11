@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { Sidebar } from '@/components/resident/Sidebar';
 import { NotificationBell } from '@/components/NotificationBell';
+import { DashboardShell } from '@/components/DashboardShell';
 import type { Profile } from '@/lib/types';
 
 // Ove stranice prikazuju licne podatke ulogovanog korisnika — nikad ih ne kesiraj,
@@ -33,18 +34,13 @@ export default async function ResidentLayout({ children }: { children: React.Rea
   });
 
   return (
-    <div className="flex min-h-screen">
-      <Sidebar name={profile.name} unit={profile.unit} buildingName={building?.name ?? 'Zgrada'} />
-      <div className="flex-1 min-w-0 flex flex-col">
-        <header className="flex items-center justify-between gap-4 px-8 py-5 border-b border-line bg-cream sticky top-0 z-10">
-          <div>
-            <h1 className="font-display font-semibold text-[22px] text-navy-950">Resident Hub</h1>
-            <div className="text-xs text-ink-soft font-mono capitalize">{todayLabel}</div>
-          </div>
-          <NotificationBell userId={user.id} role="resident" />
-        </header>
-        <main className="px-8 py-7 pb-16 max-w-[1180px]">{children}</main>
-      </div>
-    </div>
+    <DashboardShell
+      sidebar={<Sidebar name={profile.name} unit={profile.unit} buildingName={building?.name ?? 'Zgrada'} />}
+      title="Resident Hub"
+      subtitle={todayLabel}
+      actions={<NotificationBell userId={user.id} role="resident" />}
+    >
+      {children}
+    </DashboardShell>
   );
 }

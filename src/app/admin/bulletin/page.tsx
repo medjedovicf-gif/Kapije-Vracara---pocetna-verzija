@@ -25,7 +25,7 @@ export default async function AdminBulletinPage() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex flex-wrap gap-3 justify-between items-center mb-4">
         <p className="text-ink-soft text-sm">Obaveštenja vidljiva svim stanarima vaše zgrade.</p>
         <NewBulletinButton />
       </div>

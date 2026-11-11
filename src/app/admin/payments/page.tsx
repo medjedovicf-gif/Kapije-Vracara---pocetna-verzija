@@ -44,7 +44,7 @@ export default async function AdminPaymentsPage() {
     <div>
       <p className="text-ink-soft text-sm mb-6">Stanje uplata po stanovima i slanje faktura.</p>
 
-      <div className="grid grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <div className="card">
           <div className="w-[34px] h-[34px] rounded-[10px] bg-cream-2 flex items-center justify-center mb-2.5">
             <CheckCircle2 size={16} className="text-navy-950" />
@@ -62,7 +62,7 @@ export default async function AdminPaymentsPage() {
       </div>
 
       <div className="card">
-        <table className="w-full text-[13px]">
+        <div className="overflow-x-auto"><table className="min-w-[640px] w-full text-[13px]">
           <thead>
             <tr className="text-left font-mono text-[10.5px] uppercase tracking-wide text-ink-faint border-b border-line">
               <th className="pb-2.5 font-semibold">Stan</th>
@@ -90,7 +90,7 @@ export default async function AdminPaymentsPage() {
               <tr><td colSpan={5} className="py-4 text-[12.5px] text-ink-faint">Nema stanova u ovoj zgradi.</td></tr>
             )}
           </tbody>
-        </table>
+        </table></div>
       </div>
     </div>
   );

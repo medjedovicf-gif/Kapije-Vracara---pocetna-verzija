@@ -37,7 +37,7 @@ export default async function AdminPollsPage() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex flex-wrap gap-3 justify-between items-center mb-4">
         <p className="text-ink-soft text-sm">Ankete i glasanja za vašu zgradu.</p>
         <NewPollButton />
       </div>
