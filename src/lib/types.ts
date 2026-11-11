@@ -79,6 +79,8 @@ export interface Poll {
   id: number;
   title: string;
   description: string | null;
+  image_url: string | null;
+  hero_image_url: string | null;
   building_id: string | null;
   status: PollStatus;
   created_by: string | null;
@@ -117,6 +119,38 @@ export interface Invoice {
   amount: number;
   month: string;
   status: string;
+  from_email: string | null;
+  recipient_name: string | null;
+  recipient_email: string | null;
+  description: string | null;
+  due_date: string | null;
+  paid_at: string | null;
+  created_at: string;
+}
+
+export interface InvoicePayment {
+  id: number;
+  invoice_id: number | null;
+  unit: string;
+  building_id: string;
+  amount: number;
+  payment_date: string;
+  reference: string | null;
+  note: string | null;
+  recorded_by: string | null;
+  created_at: string;
+}
+
+export interface BankStatement {
+  id: number;
+  building_id: string;
+  statement_date: string;
+  payer: string | null;
+  reference: string | null;
+  amount: number;
+  raw_text: string | null;
+  matched_invoice_id: number | null;
+  created_by: string | null;
   created_at: string;
 }
 
@@ -173,6 +207,8 @@ export interface Database {
       poll_votes: Table<PollVote>;
       bulletin_posts: Table<BulletinPost>;
       invoices: Table<Invoice>;
+      invoice_payments: Table<InvoicePayment>;
+      bank_statements: Table<BankStatement>;
       permissions: Table<PermissionRow>;
       notifications: Table<AppNotification>;
       push_subscriptions: Table<PushSubscriptionRow>;

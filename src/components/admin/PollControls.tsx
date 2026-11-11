@@ -61,6 +61,14 @@ export function NewPollButton({ buildingId, buildings }: { buildingId?: string; 
                 <label className="field-label">Opis</label>
                 <textarea name="description" rows={2} className="field-input" placeholder="Kratak opis o čemu se glasa" />
               </div>
+              <div className="mb-3">
+                <label className="field-label">Slika ankete (URL)</label>
+                <input name="image_url" type="url" className="field-input" placeholder="https://..." />
+              </div>
+              <div className="mb-3">
+                <label className="field-label">Hero slika ankete (URL)</label>
+                <input name="hero_image_url" type="url" className="field-input" placeholder="Ako ostane prazno koristi se slika ankete" />
+              </div>
               <label className="field-label">Opcije za glasanje</label>
               {options.map((opt, i) => (
                 <div key={i} className="flex gap-2 mb-2">

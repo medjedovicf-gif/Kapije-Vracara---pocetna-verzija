@@ -80,6 +80,39 @@ export async function deleteResident(profileId: string) {
   return { success: true };
 }
 
+export async function updateResident(profileId: string, formData: FormData) {
+  const ctx = await requireStaff();
+  if ('error' in ctx) return ctx;
+  const { me, supabase } = ctx;
+
+  const name = String(formData.get('name') || '').trim();
+  const unit = String(formData.get('unit') || '').trim();
+  const balance = Number(formData.get('balance') || 0);
+  const paymentStatus = String(formData.get('payment_status') || 'Na čekanju');
+  const buildingId = me.role === 'superadmin' ? String(formData.get('building_id') || '').trim() : me.building_id;
+
+  if (!name || !unit || !buildingId || !['Plaćeno', 'Na čekanju'].includes(paymentStatus)) {
+    return { error: 'Unesite ispravne podatke za stanara.' };
+  }
+
+  let query = supabase
+    .from('profiles')
+    .update({ name, unit, balance, payment_status: paymentStatus, building_id: buildingId } as never)
+    .eq('id', profileId)
+    .eq('role', 'resident');
+
+  if (me.role === 'admin') query = query.eq('building_id', me.building_id ?? '');
+
+  const { error } = await query;
+  if (error) return { error: `Stanar nije izmenjen: ${error.message}` };
+
+  revalidatePath('/admin/residents');
+  revalidatePath('/admin/payments');
+  revalidatePath('/super-admin/residents');
+  revalidatePath('/super-admin/payments');
+  return { success: true };
+}
+
 export async function changeResidentPassword(profileId: string, newPassword: string) {
   const ctx = await requireStaff();
   if ('error' in ctx) return ctx;

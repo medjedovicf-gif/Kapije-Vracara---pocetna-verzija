@@ -22,6 +22,8 @@ export async function createPoll(formData: FormData) {
 
   const title = String(formData.get('title') || '').trim();
   const description = String(formData.get('description') || '').trim();
+  const imageUrl = String(formData.get('image_url') || '').trim();
+  const heroImageUrl = String(formData.get('hero_image_url') || '').trim();
   const options = formData.getAll('options').map((o) => String(o).trim()).filter(Boolean);
   const buildingId =
     me.role === 'superadmin' ? String(formData.get('building_id') || '') || null : me.building_id;
@@ -30,7 +32,7 @@ export async function createPoll(formData: FormData) {
 
   const { data: poll, error: pollError } = await supabase
     .from('polls')
-    .insert({ title, description: description || null, building_id: buildingId, status: 'active', created_by: me.id } as never)
+    .insert({ title, description: description || null, image_url: imageUrl || null, hero_image_url: heroImageUrl || imageUrl || null, building_id: buildingId, status: 'active', created_by: me.id } as never)
     .select('id')
     .single<{ id: number }>();
   if (pollError || !poll) return { error: pollError?.message ?? 'Greška pri kreiranju ankete.' };

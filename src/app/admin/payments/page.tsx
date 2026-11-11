@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { CheckCircle2, Clock } from 'lucide-react';
-import type { Profile } from '@/lib/types';
+import type { Invoice, Profile } from '@/lib/types';
 import { SendInvoiceButton } from '@/components/admin/SendInvoiceButton';
 
 export const dynamic = 'force-dynamic';
@@ -17,13 +17,25 @@ export default async function AdminPaymentsPage() {
   const { data: me } = await supabase.from('profiles').select('*').eq('id', user.id).single<Profile>();
   if (!me || me.role !== 'admin') redirect('/login');
 
-  const { data: residents } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('role', 'resident')
-    .eq('building_id', me.building_id ?? '')
-    .order('unit')
-    .returns<Profile[]>();
+  const [{ data: residents }, { data: invoices }] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('*')
+      .eq('role', 'resident')
+      .eq('building_id', me.building_id ?? '')
+      .order('unit')
+      .returns<Profile[]>(),
+    supabase
+      .from('invoices')
+      .select('*')
+      .eq('building_id', me.building_id ?? '')
+      .order('created_at', { ascending: false })
+      .returns<Invoice[]>(),
+  ]);
+  const latestByUnit = new Map<string, Invoice>();
+  (invoices ?? []).forEach((invoice) => {
+    if (!latestByUnit.has(invoice.unit)) latestByUnit.set(invoice.unit, invoice);
+  });
 
   const paid = (residents ?? []).filter((r) => r.payment_status === 'Plaćeno').reduce((a, r) => a + r.balance, 0);
   const pending = (residents ?? []).filter((r) => r.payment_status !== 'Plaćeno').reduce((a, r) => a + r.balance, 0);
@@ -70,7 +82,7 @@ export default async function AdminPaymentsPage() {
                   <span className={`tag ${r.payment_status === 'Plaćeno' ? 'tag-sage' : 'tag-gold'}`}>{r.payment_status}</span>
                 </td>
                 <td className="py-3">
-                  <SendInvoiceButton unit={r.unit ?? ''} buildingId={r.building_id ?? ''} amount={r.balance} />
+                  <SendInvoiceButton resident={r} latestInvoice={r.unit ? latestByUnit.get(r.unit) : undefined} />
                 </td>
               </tr>
             ))}

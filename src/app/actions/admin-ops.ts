@@ -32,7 +32,25 @@ export async function updateTicketDetails(ticketId: number, values: { title: str
   const { data: before } = await oldQuery;
   if (!before) return { error: 'Problem nije pronađen ili nije u vašoj zgradi.' };
   const assignedTo = values.assigned_to || null;
-  const { error } = await ctx.supabase.from('tickets').update({ title: values.title.trim(), description: values.description.trim() || null, category: values.category.trim() || 'Ostalo', unit: values.unit.trim(), status: values.status, priority: values.priority, due_at: values.due_at || null, assigned_to: assignedTo, appointment_date: values.appointment_date || null, appointment_start: values.appointment_start || null, appointment_end: values.appointment_end || null, appointment_status: values.appointment_status || 'Nije zakazano' } as never).eq('id', ticketId);
+  const patch: Record<string, string | null> = {
+    title: values.title.trim(),
+    description: values.description.trim() || null,
+    category: values.category.trim() || 'Ostalo',
+    unit: values.unit.trim(),
+    status: values.status,
+    priority: values.priority,
+    due_at: values.due_at || null,
+    assigned_to: assignedTo,
+  };
+
+  if (values.appointment_date || values.appointment_start || values.appointment_end || values.appointment_status) {
+    patch.appointment_date = values.appointment_date || null;
+    patch.appointment_start = values.appointment_start || null;
+    patch.appointment_end = values.appointment_end || null;
+    patch.appointment_status = values.appointment_status || 'Nije zakazano';
+  }
+
+  const { error } = await ctx.supabase.from('tickets').update(patch as never).eq('id', ticketId);
   if (error) return { error: error.message };
   const changed = `${before.status} → ${values.status}`;
   await audit(ctx.supabase, ctx.userId, 'ticket.updated', String(ticketId), `Problem #${ticketId} je izmenjen (${changed}).`, before, values);

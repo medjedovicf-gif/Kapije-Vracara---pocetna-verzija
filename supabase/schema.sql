@@ -32,6 +32,16 @@ create table tickets (
   category text not null default 'Ostalo',
   description text,
   status text not null default 'Novo' check (status in ('Novo','Zakazano','U toku','Rešeno')),
+  priority text not null default 'Medium' check (priority in ('Low','Medium','High','Critical')),
+  due_at timestamptz,
+  assigned_to uuid references profiles(id) on delete set null,
+  updated_at timestamptz not null default now(),
+  location text,
+  is_emergency boolean not null default false,
+  appointment_date date,
+  appointment_start time,
+  appointment_end time,
+  appointment_status text not null default 'Nije zakazano' check (appointment_status in ('Nije zakazano','Predloženo','Potvrđeno','Promena tražena','Završeno')),
   building_id uuid not null references buildings(id),
   reported_by uuid references profiles(id),
   created_at timestamptz not null default now()
@@ -44,10 +54,52 @@ create table ticket_photos (
   created_at timestamptz not null default now()
 );
 
+create table ticket_comments (
+  id bigint generated always as identity primary key,
+  ticket_id bigint not null references tickets(id) on delete cascade,
+  author_id uuid not null references profiles(id),
+  body text not null,
+  created_at timestamptz not null default now()
+);
+
+create table audit_logs (
+  id bigint generated always as identity primary key,
+  actor_id uuid references profiles(id) on delete set null,
+  action text not null,
+  entity_type text not null,
+  entity_id text,
+  summary text not null,
+  before_value jsonb,
+  after_value jsonb,
+  created_at timestamptz not null default now()
+);
+
+create table ticket_ratings (
+  id bigint generated always as identity primary key,
+  ticket_id bigint not null unique references tickets(id) on delete cascade,
+  resident_id uuid not null references profiles(id) on delete cascade,
+  rating integer not null check (rating between 1 and 5),
+  comment text,
+  created_at timestamptz not null default now()
+);
+
+create table user_notification_preferences (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  push_enabled boolean not null default true,
+  email_enabled boolean not null default false,
+  problem_updates boolean not null default true,
+  comments_replies boolean not null default true,
+  building_announcements boolean not null default true,
+  appointment_reminders boolean not null default true,
+  updated_at timestamptz not null default now()
+);
+
 create table polls (
   id bigint generated always as identity primary key,
   title text not null,
   description text,
+  image_url text,
+  hero_image_url text,
   building_id uuid references buildings(id), -- NULL = cela platforma
   status text not null default 'active' check (status in ('active','closed')),
   created_by uuid references profiles(id),
@@ -87,6 +139,38 @@ create table invoices (
   amount numeric not null,
   month text not null,
   status text not null default 'Poslata',
+  from_email text,
+  recipient_name text,
+  recipient_email text,
+  description text,
+  due_date date,
+  paid_at date,
+  created_at timestamptz not null default now()
+);
+
+create table invoice_payments (
+  id bigint generated always as identity primary key,
+  invoice_id bigint references invoices(id) on delete set null,
+  unit text not null,
+  building_id uuid not null references buildings(id),
+  amount numeric not null,
+  payment_date date not null default current_date,
+  reference text,
+  note text,
+  recorded_by uuid references profiles(id) on delete set null,
+  created_at timestamptz not null default now()
+);
+
+create table bank_statements (
+  id bigint generated always as identity primary key,
+  building_id uuid not null references buildings(id),
+  statement_date date not null default current_date,
+  payer text,
+  reference text,
+  amount numeric not null,
+  raw_text text,
+  matched_invoice_id bigint references invoices(id) on delete set null,
+  created_by uuid references profiles(id) on delete set null,
   created_at timestamptz not null default now()
 );
 
@@ -152,11 +236,17 @@ alter table buildings enable row level security;
 alter table profiles enable row level security;
 alter table tickets enable row level security;
 alter table ticket_photos enable row level security;
+alter table ticket_comments enable row level security;
+alter table audit_logs enable row level security;
+alter table ticket_ratings enable row level security;
+alter table user_notification_preferences enable row level security;
 alter table polls enable row level security;
 alter table poll_options enable row level security;
 alter table poll_votes enable row level security;
 alter table bulletin_posts enable row level security;
 alter table invoices enable row level security;
+alter table invoice_payments enable row level security;
+alter table bank_statements enable row level security;
 alter table permissions enable row level security;
 alter table notifications enable row level security;
 alter table push_subscriptions enable row level security;
@@ -201,6 +291,31 @@ create policy "ticket_photos_insert" on ticket_photos for insert with check (
   ))
 );
 
+create policy "ticket_comments_staff_or_own" on ticket_comments for select using (
+  exists (select 1 from tickets t where t.id = ticket_id and (
+    t.reported_by = auth.uid() or
+    (my_role() = 'admin' and t.building_id = my_building_id()) or
+    my_role() = 'superadmin'
+  ))
+);
+create policy "ticket_comments_insert_staff_or_own" on ticket_comments for insert with check (
+  author_id = auth.uid() and exists (select 1 from tickets t where t.id = ticket_id and (
+    t.reported_by = auth.uid() or
+    (my_role() = 'admin' and t.building_id = my_building_id()) or
+    my_role() = 'superadmin'
+  ))
+);
+
+create policy "audit_logs_staff_read" on audit_logs for select using (
+  my_role() = 'superadmin' or
+  (my_role() = 'admin' and (actor_id = auth.uid() or exists (select 1 from tickets t where t.id::text = entity_id and t.building_id = my_building_id())))
+);
+create policy "audit_logs_insert_authenticated" on audit_logs for insert with check (actor_id = auth.uid());
+
+create policy "ticket_ratings_own_or_staff" on ticket_ratings for select using (resident_id = auth.uid() or my_role() in ('admin','superadmin'));
+create policy "ticket_ratings_insert_own" on ticket_ratings for insert with check (resident_id = auth.uid() and exists (select 1 from tickets t where t.id = ticket_id and t.reported_by = auth.uid() and t.status = 'Rešeno'));
+create policy "user_notification_preferences_own" on user_notification_preferences for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+
 -- POLLS (vidljivi ako pripadaju mojoj zgradi ili su globalni)
 create policy "polls_select" on polls for select using (
   building_id is null or building_id = my_building_id() or my_role() = 'superadmin'
@@ -231,6 +346,19 @@ create policy "invoices_select_admin" on invoices for select using (my_role() = 
 create policy "invoices_select_superadmin" on invoices for select using (my_role() = 'superadmin');
 create policy "invoices_insert_admin" on invoices for insert with check (my_role() = 'admin' and building_id = my_building_id());
 create policy "invoices_insert_superadmin" on invoices for insert with check (my_role() = 'superadmin');
+create policy "invoices_update_admin" on invoices for update using (my_role() = 'admin' and building_id = my_building_id());
+create policy "invoices_update_superadmin" on invoices for update using (my_role() = 'superadmin');
+
+create policy "invoice_payments_select_resident" on invoice_payments for select using (my_role() = 'resident' and unit = my_unit() and building_id = my_building_id());
+create policy "invoice_payments_select_admin" on invoice_payments for select using (my_role() = 'admin' and building_id = my_building_id());
+create policy "invoice_payments_select_superadmin" on invoice_payments for select using (my_role() = 'superadmin');
+create policy "invoice_payments_insert_admin" on invoice_payments for insert with check (my_role() = 'admin' and building_id = my_building_id());
+create policy "invoice_payments_insert_superadmin" on invoice_payments for insert with check (my_role() = 'superadmin');
+
+create policy "bank_statements_select_admin" on bank_statements for select using (my_role() = 'admin' and building_id = my_building_id());
+create policy "bank_statements_select_superadmin" on bank_statements for select using (my_role() = 'superadmin');
+create policy "bank_statements_insert_admin" on bank_statements for insert with check (my_role() = 'admin' and building_id = my_building_id());
+create policy "bank_statements_insert_superadmin" on bank_statements for insert with check (my_role() = 'superadmin');
 
 -- PERMISSIONS (svi čitaju, samo superadmin menja)
 create policy "permissions_select_all" on permissions for select using (auth.role() = 'authenticated');
@@ -246,6 +374,14 @@ do $$ begin
   alter publication supabase_realtime add table notifications;
 exception when duplicate_object then null;
 end $$;
+do $$ begin
+  alter publication supabase_realtime add table tickets;
+exception when duplicate_object then null;
+end $$;
+do $$ begin
+  alter publication supabase_realtime add table ticket_comments;
+exception when duplicate_object then null;
+end $$;
 
 -- ---------- 6. RPC FUNKCIJA: glasanje (atomično, sprečava duplo glasanje) ----------
 create or replace function cast_vote(p_poll_id bigint, p_option_id bigint)
@@ -259,6 +395,16 @@ begin
   update poll_options set votes = votes + 1 where id = p_option_id;
 end;
 $$;
+
+create or replace function touch_ticket_updated_at() returns trigger
+language plpgsql as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+create trigger trg_touch_ticket_updated_at before update on tickets
+  for each row execute function touch_ticket_updated_at();
 
 -- ---------- 7. TRIGGERI: automatska obaveštenja ----------
 -- Novi zahtev -> obavesti sve admine/superadmine te zgrade

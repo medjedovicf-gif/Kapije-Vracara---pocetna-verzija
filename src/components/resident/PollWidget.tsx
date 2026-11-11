@@ -10,6 +10,7 @@ export function PollWidget({ poll, options, alreadyVoted }: { poll: Poll; option
   const [isPending, startTransition] = useTransition();
 
   const total = localOptions.reduce((a, o) => a + o.votes, 0) || 1;
+  const heroImage = poll.hero_image_url || poll.image_url || 'https://images.unsplash.com/photo-1571902943202-507ec2618e8f?auto=format&fit=crop&w=600&q=60';
 
   function vote(optionId: number) {
     if (voted || isPending) return;
@@ -27,7 +28,7 @@ export function PollWidget({ poll, options, alreadyVoted }: { poll: Poll; option
       <div className="relative h-[150px]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="https://images.unsplash.com/photo-1571902943202-507ec2618e8f?auto=format&fit=crop&w=600&q=60"
+          src={heroImage}
           alt="Anketa"
           className="w-full h-full object-cover"
         />
@@ -36,6 +37,12 @@ export function PollWidget({ poll, options, alreadyVoted }: { poll: Poll; option
       </div>
       <div className="p-4">
         {poll.description && <p className="text-[12.5px] text-ink-soft mb-3.5">{poll.description}</p>}
+        {poll.image_url && poll.image_url !== heroImage && (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={poll.image_url} alt="" className="w-full h-28 object-cover rounded-md border border-line mb-3.5" />
+          </>
+        )}
         {localOptions.map((o) => {
           const pct = Math.round((o.votes / total) * 100);
           return (

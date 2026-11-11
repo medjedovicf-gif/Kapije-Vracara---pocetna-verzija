@@ -50,7 +50,7 @@ export default async function AdminResidentsPage() {
                 <td className="py-3">{r.name}</td>
                 <td className="py-3 text-right font-mono font-bold">{r.balance.toLocaleString('de-DE')} RSD</td>
                 <td className="py-3"><StatusTag profileId={r.id} status={r.payment_status} /></td>
-                <td className="py-3"><ResidentRowActions profileId={r.id} /></td>
+                <td className="py-3"><ResidentRowActions resident={r} /></td>
               </tr>
             ))}
             {!residents?.length && (

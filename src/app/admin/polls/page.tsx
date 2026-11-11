@@ -50,9 +50,15 @@ export default async function AdminPollsPage() {
         return (
           <div key={p.id} className="card mb-3.5">
             <div className="flex justify-between items-start mb-2.5">
-              <div>
+              <div className="flex gap-3 min-w-0">
+                {(p.hero_image_url || p.image_url) && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={p.hero_image_url || p.image_url || ''} alt="" className="w-16 h-12 object-cover rounded-md border border-line shrink-0" />
+                )}
+                <div className="min-w-0">
                 <div className="font-bold text-[14.5px]">{p.title}</div>
                 <div className="text-xs text-ink-soft mt-0.5">{p.description}</div>
+                </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <span className={`tag ${p.status === 'active' ? 'tag-sage' : 'tag-brick'}`}>
