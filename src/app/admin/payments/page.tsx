@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { getMyProfile, getSessionUser } from '@/lib/session';
 import { redirect } from 'next/navigation';
 import { CheckCircle2, Clock } from 'lucide-react';
 import type { Invoice, Profile } from '@/lib/types';
@@ -9,12 +10,10 @@ export const revalidate = 0;
 
 export default async function AdminPaymentsPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getSessionUser();
   if (!user) redirect('/login');
 
-  const { data: me } = await supabase.from('profiles').select('*').eq('id', user.id).single<Profile>();
+  const me = await getMyProfile();
   if (!me || me.role !== 'admin') redirect('/login');
 
   const [{ data: residents }, { data: invoices }] = await Promise.all([

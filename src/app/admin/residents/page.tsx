@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { getMyProfile, getSessionUser } from '@/lib/session';
 import { redirect } from 'next/navigation';
 import type { Profile } from '@/lib/types';
 import { AddResidentButton, ResidentRowActions, StatusTag } from '@/components/admin/ResidentActions';
@@ -8,12 +9,10 @@ export const revalidate = 0;
 
 export default async function AdminResidentsPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getSessionUser();
   if (!user) redirect('/login');
 
-  const { data: meData } = await supabase.from('profiles').select('*').eq('id', user.id).single<Profile>();
+  const meData = await getMyProfile();
   const me = meData as unknown as Profile | null;
   if (!me || me.role !== 'admin') redirect('/login');
 

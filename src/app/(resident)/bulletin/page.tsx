@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { getMyProfile, getSessionUser } from '@/lib/session';
 import { redirect } from 'next/navigation';
 import { Megaphone } from 'lucide-react';
 import type { Profile, BulletinPost, Poll, PollOption } from '@/lib/types';
@@ -9,12 +10,10 @@ export const revalidate = 0;
 
 export default async function BulletinPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getSessionUser();
   if (!user) redirect('/login');
 
-  const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single<Profile>();
+  const profile = await getMyProfile();
   if (!profile) redirect('/login');
 
   const { data: posts } = await supabase

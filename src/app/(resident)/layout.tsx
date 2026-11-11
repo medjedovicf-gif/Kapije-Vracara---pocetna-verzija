@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { getMyProfile, getSessionUser } from '@/lib/session';
 import { redirect } from 'next/navigation';
 import { Sidebar } from '@/components/resident/Sidebar';
 import { NotificationBell } from '@/components/NotificationBell';
@@ -13,13 +14,11 @@ export const revalidate = 0;
 
 export default async function ResidentLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getSessionUser();
 
   if (!user) redirect('/login');
 
-  const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single<Profile>();
+  const profile = await getMyProfile();
   if (!profile) redirect('/login');
 
   const { data: building } = profile.building_id
@@ -35,6 +34,7 @@ export default async function ResidentLayout({ children }: { children: React.Rea
 
   return (
     <DashboardShell
+      role="resident"
       sidebar={<Sidebar name={profile.name} unit={profile.unit} buildingName={building?.name ?? 'Zgrada'} />}
       title="Resident Hub"
       subtitle={todayLabel}

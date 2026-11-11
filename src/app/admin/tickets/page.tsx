@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { getMyProfile, getSessionUser } from '@/lib/session';
 import { redirect } from 'next/navigation';
 import type { Profile, Ticket, TicketComment } from '@/lib/types';
 import { NewTicketButton } from '@/components/admin/TicketControls';
@@ -15,9 +16,9 @@ export default async function AdminTicketsPage({ searchParams }: { searchParams:
   const openTicketId = Number(one(sp.ticket)) || null;
   const initial = { status: one(sp.status) || 'all', priority: one(sp.priority) || 'all', filter: one(sp.filter) };
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getSessionUser();
   if (!user) redirect('/login');
-  const { data: me } = await supabase.from('profiles').select('*').eq('id', user.id).single<Profile>();
+  const me = await getMyProfile();
   if (!me || me.role !== 'admin' || !me.building_id) redirect('/login');
   const [{ data: tickets }, { data: people }, { data: comments }] = await Promise.all([
     supabase.from('tickets').select('*').eq('building_id', me.building_id).order('created_at', { ascending: false }).returns<Ticket[]>(),

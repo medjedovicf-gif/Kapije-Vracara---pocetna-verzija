@@ -1,12 +1,13 @@
 import { createClient } from '@/lib/supabase/server';
+import { getMyProfile, getSessionUser } from '@/lib/session';
 import { redirect } from 'next/navigation';
 import { BarChart3 } from 'lucide-react';
 import type { Profile, Ticket } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 export default async function Page() {
-  const supabase = await createClient(); const { data: { user } } = await supabase.auth.getUser(); if (!user) redirect('/login');
-  const { data: me } = await supabase.from('profiles').select('*').eq('id', user.id).single<Profile>(); if (!me || me.role !== 'admin' || !me.building_id) redirect('/login');
+  const supabase = await createClient(); const user = await getSessionUser(); if (!user) redirect('/login');
+  const me = await getMyProfile(); if (!me || me.role !== 'admin' || !me.building_id) redirect('/login');
   const { data: tickets } = await supabase.from('tickets').select('*').eq('building_id', me.building_id).order('created_at').returns<Ticket[]>(); const all = tickets ?? [];
   const resolved = all.filter((t) => t.status === 'Rešeno'); const avgHours = resolved.length ? Math.round(resolved.reduce((sum, t) => sum + (new Date(t.updated_at || t.created_at).getTime() - new Date(t.created_at).getTime()) / 36e5, 0) / resolved.length) : 0;
   const groups = (values: string[]) => values.map((label) => ({ label, value: all.filter((t) => t.category === label).length }));

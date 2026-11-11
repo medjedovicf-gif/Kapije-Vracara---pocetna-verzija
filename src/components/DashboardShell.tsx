@@ -2,9 +2,11 @@
 
 import { useEffect, useState, type ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
-import { Menu, X } from 'lucide-react';
+import { X } from 'lucide-react';
+import { BottomNav, type DashboardRole } from '@/components/BottomNav';
 
 type Props = {
+  role: DashboardRole;
   sidebar: ReactNode;
   title: string;
   subtitle?: ReactNode;
@@ -14,8 +16,8 @@ type Props = {
 
 // Zajednički okvir za sva tri dashboarda.
 // Desktop (md+): sidebar stoji levo kao i ranije.
-// Telefon: sidebar je skriven, otvara se kao drawer preko dugmeta u headeru.
-export function DashboardShell({ sidebar, title, subtitle, actions, children }: Props) {
+// Telefon: donji meni sa glavnim stranicama; "Meni" otvara ceo sidebar kao drawer.
+export function DashboardShell({ role, sidebar, title, subtitle, actions, children }: Props) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
@@ -58,13 +60,6 @@ export function DashboardShell({ sidebar, title, subtitle, actions, children }: 
       <div className="flex-1 min-w-0 flex flex-col">
         <header className="flex items-center justify-between gap-3 px-4 py-3.5 md:px-8 md:py-5 border-b border-line bg-cream sticky top-0 z-10">
           <div className="flex items-center gap-3 min-w-0">
-            <button
-              aria-label="Otvori meni"
-              onClick={() => setOpen(true)}
-              className="md:hidden shrink-0 w-[38px] h-[38px] rounded-full bg-white border border-line flex items-center justify-center"
-            >
-              <Menu size={18} className="text-navy-950" />
-            </button>
             <div className="min-w-0">
               <h1 className="font-display font-semibold text-lg md:text-[22px] text-navy-950 truncate">{title}</h1>
               {subtitle && <div className="text-[11px] md:text-xs text-ink-soft font-mono capitalize truncate">{subtitle}</div>}
@@ -72,8 +67,10 @@ export function DashboardShell({ sidebar, title, subtitle, actions, children }: 
           </div>
           {actions}
         </header>
-        <main className="w-full px-4 py-5 pb-16 md:px-8 md:py-7 max-w-[1180px]">{children}</main>
+        <main className="w-full px-4 py-5 pb-[calc(84px+env(safe-area-inset-bottom))] md:px-8 md:py-7 md:pb-16 max-w-[1180px]">{children}</main>
       </div>
+
+      <BottomNav role={role} menuOpen={open} onMenu={() => setOpen(true)} />
     </div>
   );
 }

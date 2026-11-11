@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { getMyProfile, getSessionUser } from '@/lib/session';
 import { redirect } from 'next/navigation';
 import type { Profile, BulletinPost } from '@/lib/types';
 import { NewBulletinButton, DeleteBulletinButton } from '@/components/admin/BulletinControls';
@@ -8,12 +9,10 @@ export const revalidate = 0;
 
 export default async function AdminBulletinPage() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getSessionUser();
   if (!user) redirect('/login');
 
-  const { data: me } = await supabase.from('profiles').select('*').eq('id', user.id).single<Profile>();
+  const me = await getMyProfile();
   if (!me || me.role !== 'admin') redirect('/login');
 
   const { data: posts } = await supabase

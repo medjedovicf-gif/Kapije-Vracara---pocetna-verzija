@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { AlertTriangle, CheckCircle2, ChevronRight, Clock3, ListFilter, UserRound, Wrench } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
+import { getMyProfile, getSessionUser } from '@/lib/session';
 import { redirect } from 'next/navigation';
 import type { Profile, Ticket } from '@/lib/types';
 import { AdminRealtimeRefresh } from '@/components/admin/AdminRealtimeRefresh';
@@ -15,9 +16,9 @@ const tickets = (params: Record<string, string> = {}) => {
 
 export default async function AdminOverviewPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getSessionUser();
   if (!user) redirect('/login');
-  const { data: me } = await supabase.from('profiles').select('*').eq('id', user.id).single<Profile>();
+  const me = await getMyProfile();
   if (!me || me.role !== 'admin' || !me.building_id) redirect('/login');
   const [{ data: residents }, { data: ticketRows }] = await Promise.all([
     supabase.from('profiles').select('*').eq('role', 'resident').eq('building_id', me.building_id).returns<Profile[]>(),

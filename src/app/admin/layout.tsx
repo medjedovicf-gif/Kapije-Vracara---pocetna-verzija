@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { getMyProfile, getSessionUser } from '@/lib/session';
 import { redirect } from 'next/navigation';
 import { AdminSidebar } from '@/components/admin/Sidebar';
 import { NotificationBell } from '@/components/NotificationBell';
@@ -10,12 +11,10 @@ export const revalidate = 0;
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getSessionUser();
   if (!user) redirect('/login');
 
-  const { data: profileData } = await supabase.from('profiles').select('*').eq('id', user.id).single<Profile>();
+  const profileData = await getMyProfile();
   const profile = profileData as unknown as Profile | null;
   // Sigurnosna provera i ovde, ne samo u middleware-u — odbrana u dubinu.
   if (!profile || profile.role !== 'admin') redirect('/login');
@@ -33,6 +32,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <DashboardShell
+      role="admin"
       sidebar={<AdminSidebar name={profile.name} buildingName={building?.name ?? 'Zgrada'} />}
       title="Admin Dashboard"
       subtitle={todayLabel}

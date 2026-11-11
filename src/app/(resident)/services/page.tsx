@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { getMyProfile, getSessionUser } from '@/lib/session';
 import { redirect } from 'next/navigation';
 import { Wrench, Zap, Wind, Sparkles } from 'lucide-react';
 import type { AuditLog, Profile, Ticket, TicketComment, TicketPhoto, TicketRating } from '@/lib/types';
@@ -15,8 +16,8 @@ const CATEGORY_TILES = [
 ];
 
 export default async function ServicesPage() {
-  const supabase = await createClient(); const { data: { user } } = await supabase.auth.getUser(); if (!user) redirect('/login');
-  const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single<Profile>(); if (!profile) redirect('/login');
+  const supabase = await createClient(); const user = await getSessionUser(); if (!user) redirect('/login');
+  const profile = await getMyProfile(); if (!profile) redirect('/login');
   const { data: tickets } = await supabase.from('tickets').select('*').eq('reported_by', user.id).order('created_at', { ascending: false }).returns<Ticket[]>();
   const ids = (tickets ?? []).map((t) => t.id);
   const [{ data: photos }, { data: comments }, { data: logs }, { data: ratings }] = await Promise.all([
