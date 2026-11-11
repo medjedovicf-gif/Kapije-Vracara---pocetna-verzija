@@ -1,7 +1,7 @@
 'use client';
 
-
-import { useRouter } from 'next/navigation';import { useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
+import { useState, useTransition } from 'react';
 import { Plus, X, Check, Trash2 } from 'lucide-react';
 import { createBulletinPost, deleteBulletinPost } from '@/app/actions/bulletin';
 

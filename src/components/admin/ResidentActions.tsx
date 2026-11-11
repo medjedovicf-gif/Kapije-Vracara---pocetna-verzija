@@ -1,7 +1,7 @@
 'use client';
 
-
-import { useRouter } from 'next/navigation';import { useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
+import { useState, useTransition } from 'react';
 import { UserPlus, X, Check, KeyRound, Trash2, Pencil } from 'lucide-react';
 import { addResident, deleteResident, changeResidentPassword, toggleResidentStatus, updateResident } from '@/app/actions/residents';
 import type { Profile } from '@/lib/types';

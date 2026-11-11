@@ -1,7 +1,7 @@
 'use client';
 
-
-import { useRouter } from 'next/navigation';import type { ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
+import type { ReactNode } from 'react';
 import { useState, useTransition } from 'react';
 import { Check, FileText, ReceiptText, Send, X } from 'lucide-react';
 import { addBankStatement, createInvoice, recordManualInvoicePayment } from '@/app/actions/invoices';

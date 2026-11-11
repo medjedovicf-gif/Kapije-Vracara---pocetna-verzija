@@ -1,7 +1,7 @@
 'use client';
 
-
-import { useRouter } from 'next/navigation';import { useMemo, useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
+import { useMemo, useState, useTransition } from 'react';
 import { Check, ChevronDown, MessageSquare, Star } from 'lucide-react';
 import { addResidentComment, confirmAppointment, rateResolvedTicket } from '@/app/actions/user-actions';
 import type { AuditLog, Profile, Ticket, TicketComment, TicketPhoto, TicketRating } from '@/lib/types';

@@ -1,9 +1,10 @@
 'use client';
 
-
-import { useRouter } from 'next/navigation';import { useState, useRef, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
+import { useState, useRef, useTransition } from 'react';
 import { Camera, X, Check, Siren } from 'lucide-react';
 import { createTicket } from '@/app/actions/tickets';
+import { compressImage } from '@/lib/compress-image';
 
 const CATEGORIES = ['Održavanje', 'Vodoinstalacije', 'Elektrika', 'Klima', 'Čišćenje', 'Ostalo'];
 
@@ -13,6 +14,7 @@ export function ReportIssueButton({ presetCategory, compact = false }: { presetC
   const [photos, setPhotos] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const [error, setError] = useState('');
+  const [compressing, setCompressing] = useState(false);
   const [isPending, startTransition] = useTransition();
   const fileInput = useRef<HTMLInputElement>(null);
 
@@ -23,16 +25,18 @@ export function ReportIssueButton({ presetCategory, compact = false }: { presetC
     setOpen(true);
   }
 
-  function handleFiles(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFiles(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files || []);
-    const room = 5 - photos.length;
-    const accepted = files.slice(0, room);
-    setPhotos((prev) => [...prev, ...accepted]);
-    accepted.forEach((f) => {
-      const url = URL.createObjectURL(f);
-      setPreviews((prev) => [...prev, url]);
-    });
     if (fileInput.current) fileInput.current.value = '';
+    const room = 5 - photos.length;
+    const picked = files.slice(0, room);
+    if (!picked.length) return;
+    setCompressing(true);
+    // Smanji pre slanja: originali sa telefona su preveliki za server akciju.
+    const accepted = await Promise.all(picked.map((f) => compressImage(f)));
+    setCompressing(false);
+    setPhotos((prev) => [...prev, ...accepted]);
+    setPreviews((prev) => [...prev, ...accepted.map((f) => URL.createObjectURL(f))]);
   }
 
   function removePhoto(i: number) {
@@ -111,16 +115,16 @@ export function ReportIssueButton({ presetCategory, compact = false }: { presetC
                 <textarea name="description" rows={3} className="field-input" placeholder="Opišite kvar detaljnije..." />
               </div>
               <div className="mb-4">
-                <span className="field-label">Fotografije (do 5, 8MB po fajlu)</span>
+                <span className="field-label">Fotografije (do 5)</span>
                 <input ref={fileInput} type="file" accept="image/*" multiple onChange={handleFiles} className="hidden" />
                 <button
                   type="button"
                   onClick={() => fileInput.current?.click()}
-                  disabled={photos.length >= 5}
+                  disabled={photos.length >= 5 || compressing}
                   className="w-full flex items-center justify-center gap-2 rounded-xl border border-dashed border-navy-950/25 bg-white py-3 text-sm font-semibold text-navy-950 active:scale-[0.99] disabled:opacity-50"
                 >
                   <Camera size={16} />
-                  {photos.length ? `Dodaj još (${photos.length}/5)` : 'Dodaj fotografije'}
+                  {compressing ? 'Pripremam fotografije…' : photos.length ? `Dodaj još (${photos.length}/5)` : 'Dodaj fotografije'}
                 </button>
                 {previews.length > 0 && (
                   <div className="flex gap-2 mt-2.5 flex-wrap">
@@ -154,7 +158,7 @@ export function ReportIssueButton({ presetCategory, compact = false }: { presetC
                 <button type="button" onClick={() => setOpen(false)} className="btn btn-outline flex-1">
                   Otkaži
                 </button>
-                <button type="submit" disabled={isPending} className="btn btn-gold flex-1 disabled:opacity-60">
+                <button type="submit" disabled={isPending || compressing} className="btn btn-gold flex-1 disabled:opacity-60">
                   <Check size={15} />
                   {isPending ? 'Šalje se…' : 'Pošalji prijavu'}
                 </button>
