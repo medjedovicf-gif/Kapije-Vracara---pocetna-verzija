@@ -12,6 +12,8 @@ function roleAllowed(pathname: string, role: string): boolean {
   if (pathname.startsWith('/admin')) return role === 'admin';
   if (pathname.startsWith('/super-admin')) return role === 'superadmin';
   if (pathname.startsWith('/login')) return true;
+  // API rute same proveravaju prijavu i prava (npr. push pretplata za admina).
+  if (pathname.startsWith('/api/')) return true;
   // Promena lozinke važi za sve uloge.
   if (pathname.startsWith('/reset-password')) return true;
   // sve ostalo (Pocetna, Placanja, Mobilnost, Servisni centar, Oglasna tabla) je stanarska teritorija
