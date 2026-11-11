@@ -40,8 +40,15 @@ export async function createNotifications(input: NotificationInput) {
     dismissed: false,
     persistent: input.persistent ?? false,
   }));
-  const { data: created } = await admin.from('notifications').insert(rows as never).select('*');
-  if (!created || !configurePush()) return;
+  const { data: created, error } = await admin.from('notifications').insert(rows as never).select('*');
+  if (error) {
+    console.error('[notifications] insert failed', { type: input.type, error: error.message });
+    return;
+  }
+  if (!created || !configurePush()) {
+    if (!configurePush()) console.warn('[notifications] VAPID keys missing; browser push skipped');
+    return;
+  }
   await Promise.all((created as Array<{ id: number; recipient_id: string; title: string; sub: string | null; target: string | null }>).map(async (notification) => {
     const { data: subscriptions } = await admin.from('push_subscriptions').select('*').eq('user_id', notification.recipient_id).returns<PushSubscriptionRow[]>();
     await Promise.all((subscriptions ?? []).map(async (subscription) => {
@@ -50,6 +57,7 @@ export async function createNotifications(input: NotificationInput) {
       } catch (error: unknown) {
         const statusCode = (error as { statusCode?: number })?.statusCode;
         if (statusCode === 404 || statusCode === 410) await admin.from('push_subscriptions').delete().eq('id', subscription.id);
+        else console.error('[notifications] push send failed', { statusCode, recipient: notification.recipient_id });
       }
     }));
   }));
