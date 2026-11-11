@@ -8,7 +8,7 @@ import { logout } from '@/app/actions/auth';
 
 const NAV = [
   { href: '/admin', label: 'Pregled', icon: LayoutDashboard },
-  { href: '/admin/inbox', label: 'Admin Inbox', icon: Inbox },
+  { href: '/admin/inbox', label: 'Inbox', icon: Inbox },
   { href: '/admin/residents', label: 'Stanari', icon: Users },
   { href: '/admin/users', label: 'Korisnici', icon: Users },
   { href: '/admin/buildings', label: 'Zgrade', icon: Building2 },
@@ -16,8 +16,8 @@ const NAV = [
   { href: '/admin/polls', label: 'Ankete', icon: Vote },
   { href: '/admin/bulletin', label: 'Oglasna tabla', icon: Megaphone },
   { href: '/admin/payments', label: 'Uplate', icon: Wallet },
-  { href: '/admin/reports', label: 'Reports', icon: BarChart3 },
-  { href: '/admin/activity', label: 'Activity Log', icon: Activity },
+  { href: '/admin/reports', label: 'Izveštaji', icon: BarChart3 },
+  { href: '/admin/activity', label: 'Dnevnik aktivnosti', icon: Activity },
 ];
 
 export function AdminSidebar({ name, buildingName }: { name: string; buildingName: string }) {

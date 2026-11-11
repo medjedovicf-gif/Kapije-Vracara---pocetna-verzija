@@ -46,7 +46,7 @@ function timeAgo(iso: string) {
   if (m < 60) return `pre ${m} min`;
   const h = Math.floor(m / 60);
   if (h < 24) return `pre ${h} h`;
-  return new Date(iso).toLocaleDateString('sr-RS', { day: 'numeric', month: 'short' });
+  return new Date(iso).toLocaleDateString('sr-Latn-RS', { day: 'numeric', month: 'short' });
 }
 
 function dayGroup(iso: string) {

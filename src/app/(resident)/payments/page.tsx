@@ -66,7 +66,7 @@ export default async function PaymentsPage() {
                         </div>
                         <div>
                           <div className="font-semibold">{inv.month}</div>
-                          <div className="text-[11px] text-ink-faint">{new Date(inv.created_at).toLocaleDateString('sr-RS')}</div>
+                          <div className="text-[11px] text-ink-faint">{new Date(inv.created_at).toLocaleDateString('sr-Latn-RS')}</div>
                         </div>
                       </div>
                     </td>

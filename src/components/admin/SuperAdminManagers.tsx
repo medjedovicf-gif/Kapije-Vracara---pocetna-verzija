@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+
+import { useRouter } from 'next/navigation';import { useState, useTransition } from 'react';
 import { Check, Plus, Trash2 } from 'lucide-react';
 import { createBuilding, createManagedUser, deleteManagedUser, togglePermission, updateBuilding, updateManagedUser } from '@/app/actions/super-admin';
 import type { Building, PermissionRow, Profile } from '@/lib/types';
@@ -11,8 +12,9 @@ const roleLabel = { resident: 'Resident', admin: 'Admin', superadmin: 'Super adm
 function Result({ error }: { error: string }) { return error ? <p className="text-brick text-xs mt-2">{error}</p> : null; }
 
 export function SuperAdminUserManager({ users, buildings }: { users: User[]; buildings: Building[] }) {
+  const router = useRouter();
   const [error, setError] = useState(''); const [pending, start] = useTransition();
-  function run(action: () => Promise<{ error?: string }>) { setError(''); start(async () => { const result = await action(); if (result?.error) setError(result.error); else window.location.reload(); }); }
+  function run(action: () => Promise<{ error?: string }>) { setError(''); start(async () => { const result = await action(); if (result?.error) setError(result.error); else router.refresh(); }); }
   return <div className="space-y-5">
     <div className="card">
       <h2 className="font-display text-lg font-semibold mb-1">Dodaj korisnika</h2>
@@ -49,12 +51,14 @@ function UserRow({ user, buildings, onRun, pending }: { user: User; buildings: B
 }
 
 export function BuildingManager({ buildings }: { buildings: Building[] }) {
+  const router = useRouter();
   const [error, setError] = useState(''); const [pending, start] = useTransition();
-  function run(a: () => Promise<{ error?: string }>) { setError(''); start(async () => { const r = await a(); if (r?.error) setError(r.error); else window.location.reload(); }); }
+  function run(a: () => Promise<{ error?: string }>) { setError(''); start(async () => { const r = await a(); if (r?.error) setError(r.error); else router.refresh(); }); }
   return <div className="space-y-5"><div className="card"><h2 className="font-display text-lg font-semibold mb-4">Dodaj zgradu</h2><form onSubmit={(e) => { e.preventDefault(); run(() => createBuilding(new FormData(e.currentTarget))); }} className="flex gap-2"><input name="name" required className="field-input flex-1" placeholder="Naziv zgrade" /><button disabled={pending} className="btn btn-navy"><Plus size={15} />Dodaj</button></form><Result error={error} /></div><div className="card"><h2 className="font-display text-lg font-semibold mb-4">Zgrade i uređivanje</h2>{buildings.map((b) => <form key={b.id} onSubmit={(e) => { e.preventDefault(); run(() => updateBuilding(b.id, new FormData(e.currentTarget).get('name')?.toString() ?? '')); }} className="flex gap-2 mb-2"><input name="name" defaultValue={b.name} className="field-input flex-1" /><button disabled={pending} className="btn btn-outline">Sačuvaj</button></form>)}<Result error={error} /></div></div>;
 }
 
 export function PermissionManager({ permissions }: { permissions: PermissionRow[] }) {
+  const router = useRouter();
   const [pendingKey, setPendingKey] = useState('');
-  return <div className="card"><h2 className="font-display text-lg font-semibold mb-1">Dozvole i toggle opcije</h2><p className="text-xs text-ink-soft mb-4">Ove opcije su globalne za platformu i određuju funkcionalnosti admina i stanara.</p>{permissions.map((p) => <div key={p.key} className="flex items-center justify-between py-3 border-b border-line last:border-0"><div><div className="font-semibold text-sm">{p.key}</div><div className="text-[11px] text-ink-soft">{p.key.startsWith('admin_') ? 'Admin funkcija' : 'Resident funkcija'}</div></div><button disabled={pendingKey === p.key} onClick={async () => { setPendingKey(p.key); await togglePermission(p.key, !p.value); setPendingKey(''); window.location.reload(); }} className={`w-12 h-6 rounded-full p-1 transition-colors ${p.value ? 'bg-sage' : 'bg-ink-faint'}`}><span className={`block w-4 h-4 rounded-full bg-white transition-transform ${p.value ? 'translate-x-6' : ''}`} /></button></div>)}</div>;
+  return <div className="card"><h2 className="font-display text-lg font-semibold mb-1">Dozvole i toggle opcije</h2><p className="text-xs text-ink-soft mb-4">Ove opcije su globalne za platformu i određuju funkcionalnosti admina i stanara.</p>{permissions.map((p) => <div key={p.key} className="flex items-center justify-between py-3 border-b border-line last:border-0"><div><div className="font-semibold text-sm">{p.key}</div><div className="text-[11px] text-ink-soft">{p.key.startsWith('admin_') ? 'Admin funkcija' : 'Resident funkcija'}</div></div><button disabled={pendingKey === p.key} onClick={async () => { setPendingKey(p.key); await togglePermission(p.key, !p.value); setPendingKey(''); router.refresh(); }} className={`w-12 h-6 rounded-full p-1 transition-colors ${p.value ? 'bg-sage' : 'bg-ink-faint'}`}><span className={`block w-4 h-4 rounded-full bg-white transition-transform ${p.value ? 'translate-x-6' : ''}`} /></button></div>)}</div>;
 }

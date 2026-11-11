@@ -1,17 +1,19 @@
 'use client';
 
-import type { ReactNode } from 'react';
+
+import { useRouter } from 'next/navigation';import type { ReactNode } from 'react';
 import { useState, useTransition } from 'react';
 import { Check, FileText, ReceiptText, Send, X } from 'lucide-react';
 import { addBankStatement, createInvoice, recordManualInvoicePayment } from '@/app/actions/invoices';
 import type { Invoice, Profile } from '@/lib/types';
 
 export function SendInvoiceButton({ resident, latestInvoice }: { resident: Profile; latestInvoice?: Invoice }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
   const [isPending, startTransition] = useTransition();
-  const defaultMonth = new Date().toLocaleDateString('sr-RS', { month: 'long', year: 'numeric' });
+  const defaultMonth = new Date().toLocaleDateString('sr-Latn-RS', { month: 'long', year: 'numeric' });
   const [preview, setPreview] = useState({
     from_email: 'uprava@kapijevracara.rs',
     recipient_name: resident.name,
@@ -31,7 +33,7 @@ export function SendInvoiceButton({ resident, latestInvoice }: { resident: Profi
         setSent(true);
         setOpen(false);
         setTimeout(() => setSent(false), 2500);
-        window.location.reload();
+        router.refresh();
       }
     });
   }
@@ -140,6 +142,7 @@ function InvoicePreview({ unit, data }: { unit: string; data: { from_email: stri
 }
 
 function QuickPayment({ resident, latestInvoice }: { resident: Profile; latestInvoice?: Invoice }) {
+  const router = useRouter();
   const [msg, setMsg] = useState('');
   const [pending, start] = useTransition();
   return (
@@ -148,7 +151,7 @@ function QuickPayment({ resident, latestInvoice }: { resident: Profile; latestIn
       start(async () => {
         const result = await recordManualInvoicePayment(formData);
         setMsg(result?.error ?? 'Proknjiženo.');
-        if (!result?.error) window.location.reload();
+        if (!result?.error) router.refresh();
       });
     }} className="border border-line rounded-md bg-white p-3">
       <div className="flex items-center gap-2 font-semibold text-[12.5px] mb-3"><ReceiptText size={14} />Ručno knjiženje</div>
@@ -165,6 +168,7 @@ function QuickPayment({ resident, latestInvoice }: { resident: Profile; latestIn
 }
 
 function BankStatement({ buildingId, latestInvoice }: { buildingId: string; latestInvoice?: Invoice }) {
+  const router = useRouter();
   const [msg, setMsg] = useState('');
   const [pending, start] = useTransition();
   return (
@@ -173,7 +177,7 @@ function BankStatement({ buildingId, latestInvoice }: { buildingId: string; late
       start(async () => {
         const result = await addBankStatement(formData);
         setMsg(result?.error ?? 'Izvod dodat.');
-        if (!result?.error) window.location.reload();
+        if (!result?.error) router.refresh();
       });
     }} className="border border-line rounded-md bg-white p-3">
       <div className="flex items-center gap-2 font-semibold text-[12.5px] mb-3"><FileText size={14} />Izvod banke</div>

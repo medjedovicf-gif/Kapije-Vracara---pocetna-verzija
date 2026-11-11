@@ -12,6 +12,8 @@ function roleAllowed(pathname: string, role: string): boolean {
   if (pathname.startsWith('/admin')) return role === 'admin';
   if (pathname.startsWith('/super-admin')) return role === 'superadmin';
   if (pathname.startsWith('/login')) return true;
+  // Promena lozinke važi za sve uloge.
+  if (pathname.startsWith('/reset-password')) return true;
   // sve ostalo (Pocetna, Placanja, Mobilnost, Servisni centar, Oglasna tabla) je stanarska teritorija
   return role === 'resident';
 }
@@ -41,7 +43,8 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
-  const isPublic = pathname.startsWith('/login') || pathname.startsWith('/_next') || pathname.startsWith('/api/public');
+  const PUBLIC_PREFIXES = ['/login', '/forgot-password', '/auth/', '/_next', '/api/public', '/manifest.webmanifest', '/sw.js', '/pwa/'];
+  const isPublic = PUBLIC_PREFIXES.some((p) => pathname.startsWith(p));
 
   // Nije ulogovan i pokusava da otvori zasticenu stranicu -> login
   if (!user && !isPublic) {
@@ -74,5 +77,6 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
+  // Statični fajlovi, ikonice i PWA manifest ne prolaze kroz proveru sesije (brže, i rade bez prijave).
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|sw.js|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|webmanifest)$).*)'],
 };

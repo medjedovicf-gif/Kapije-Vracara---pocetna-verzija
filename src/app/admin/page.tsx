@@ -6,6 +6,8 @@ import { redirect } from 'next/navigation';
 import type { Profile, Ticket } from '@/lib/types';
 import { AdminRealtimeRefresh } from '@/components/admin/AdminRealtimeRefresh';
 
+import { priorityLabel } from '@/lib/labels';
+
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
@@ -46,7 +48,7 @@ export default async function AdminOverviewPage() {
     { label: 'Danas / 7 dana', value: `${todayCount} / ${weekCount}`, Icon: Clock3, color: 'text-navy-950', href: tickets() },
   ];
   const statusData = ['Novo', 'Zakazano', 'U toku', 'Rešeno'].map((status) => ({ label: status, value: all.filter((t) => t.status === status).length, href: tickets({ status }) }));
-  const priorityData = ['Critical', 'High', 'Medium', 'Low'].map((priority) => ({ label: priority, value: all.filter((t) => t.priority === priority).length, href: tickets({ priority }) }));
+  const priorityData = ['Critical', 'High', 'Medium', 'Low'].map((priority) => ({ label: priority, value: all.filter((t) => t.priority === priority).length, display: priorityLabel(priority), href: tickets({ priority }) }));
 
   return (
     <div>
@@ -96,7 +98,7 @@ export default async function AdminOverviewPage() {
               <div className="font-bold text-[13px] truncate">{t.title}</div>
               <div className="text-[11px] text-ink-soft truncate">#{t.id} · Stan {t.unit} · {t.category}</div>
             </div>
-            <span className={`tag hidden sm:inline-block ${t.priority === 'Critical' ? 'tag-brick' : t.status === 'Rešeno' ? 'tag-sage' : 'tag-gold'}`}>{t.priority} · {t.status}</span>
+            <span className={`tag hidden sm:inline-block ${t.priority === 'Critical' ? 'tag-brick' : t.status === 'Rešeno' ? 'tag-sage' : 'tag-gold'}`}>{priorityLabel(t.priority)} · {t.status}</span>
             <span className={`tag sm:hidden ${t.status === 'Rešeno' ? 'tag-sage' : 'tag-gold'}`}>{t.status}</span>
             <ChevronRight size={16} className="text-ink-faint shrink-0" />
           </Link>
@@ -126,10 +128,10 @@ function ActionGroup({ title, href, items, tone, empty }: { title: string; href:
   );
 }
 
-function Bar({ label, value, max, href, critical }: { label: string; value: number; max: number; href: string; critical?: boolean }) {
+function Bar({ label, display, value, max, href, critical }: { label: string; display?: string; value: number; max: number; href: string; critical?: boolean }) {
   return (
     <Link href={href} className="row-link block -mx-2 px-2 py-1.5 rounded-lg">
-      <div className="flex justify-between text-xs mb-1"><span>{label}</span><span className="font-mono text-ink-soft">{value}</span></div>
+      <div className="flex justify-between text-xs mb-1"><span>{display ?? label}</span><span className="font-mono text-ink-soft">{value}</span></div>
       <div className="h-2 bg-cream-2 rounded-full overflow-hidden"><div className={`h-full ${critical ? 'bg-brick' : 'bg-sage'}`} style={{ width: `${(value / max) * 100}%` }} /></div>
     </Link>
   );

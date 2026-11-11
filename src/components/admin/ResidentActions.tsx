@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+
+import { useRouter } from 'next/navigation';import { useState, useTransition } from 'react';
 import { UserPlus, X, Check, KeyRound, Trash2, Pencil } from 'lucide-react';
 import { addResident, deleteResident, changeResidentPassword, toggleResidentStatus, updateResident } from '@/app/actions/residents';
 import type { Profile } from '@/lib/types';
@@ -25,6 +26,7 @@ export function StatusTag({ profileId, status }: { profileId: string; status: st
 }
 
 export function AddResidentButton({ buildingId, buildings }: { buildingId?: string; buildings?: { id: string; name: string }[] }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState('');
   const [isPending, startTransition] = useTransition();
@@ -36,7 +38,7 @@ export function AddResidentButton({ buildingId, buildings }: { buildingId?: stri
       if (result?.error) setError(result.error);
       else {
         setOpen(false);
-        window.location.reload();
+        router.refresh();
       }
     });
   }
@@ -106,6 +108,7 @@ export function AddResidentButton({ buildingId, buildings }: { buildingId?: stri
 }
 
 export function ResidentRowActions({ resident, buildings }: { resident: Profile; buildings?: { id: string; name: string }[] }) {
+  const router = useRouter();
   const profileId = resident.id;
   const [pwOpen, setPwOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -130,7 +133,7 @@ export function ResidentRowActions({ resident, buildings }: { resident: Profile;
     if (!confirm('Ukloniti ovog stanara sa liste?')) return;
     startTransition(async () => {
       await deleteResident(profileId);
-      window.location.reload();
+      router.refresh();
     });
   }
 
@@ -141,7 +144,7 @@ export function ResidentRowActions({ resident, buildings }: { resident: Profile;
       if (result?.error) setEditError(result.error);
       else {
         setEditOpen(false);
-        window.location.reload();
+        router.refresh();
       }
     });
   }

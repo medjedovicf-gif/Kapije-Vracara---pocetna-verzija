@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+
+import { useRouter } from 'next/navigation';import { useState, useTransition } from 'react';
 import { Eye, X, Plus, Check } from 'lucide-react';
 import { updateTicketStatus, createTicketByStaff } from '@/app/actions/admin-tickets';
 import type { Ticket } from '@/lib/types';
@@ -67,6 +68,7 @@ export function TicketDetailsButton({ ticket, photoUrls }: { ticket: Ticket; pho
 }
 
 export function NewTicketButton({ units, buildingId, buildings }: { units: string[]; buildingId?: string; buildings?: { id: string; name: string }[] }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState('');
   const [isPending, startTransition] = useTransition();
@@ -78,7 +80,7 @@ export function NewTicketButton({ units, buildingId, buildings }: { units: strin
       if (result?.error) setError(result.error);
       else {
         setOpen(false);
-        window.location.reload();
+        router.refresh();
       }
     });
   }

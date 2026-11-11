@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import Link from 'next/link';
 import { login } from '@/app/actions/auth';
 
 export default function LoginPage() {
@@ -35,8 +36,11 @@ export default function LoginPage() {
             <input name="email" type="email" required className="field-input" placeholder="ime@primer.rs" />
           </div>
           <div className="mb-3">
-            <label className="field-label">Lozinka</label>
-            <input name="password" type="password" required className="field-input" placeholder="••••••" />
+            <div className="flex items-center justify-between">
+              <label className="field-label">Lozinka</label>
+              <Link href="/forgot-password" className="text-[11.5px] font-semibold text-gold-dark hover:underline mb-1.5">Zaboravili ste lozinku?</Link>
+            </div>
+            <input name="password" type="password" required autoComplete="current-password" className="field-input" placeholder="••••••" />
           </div>
           {error && <p className="text-brick text-xs mb-3">{error}</p>}
           <button type="submit" disabled={isPending} className="btn btn-gold w-full disabled:opacity-60">

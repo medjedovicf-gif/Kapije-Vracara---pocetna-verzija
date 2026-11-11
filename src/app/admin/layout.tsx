@@ -23,7 +23,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     ? (await supabase.from('buildings').select('name').eq('id', profile.building_id).single()) as unknown as { data: { name: string } | null }
     : { data: null };
 
-  const todayLabel = new Date().toLocaleDateString('sr-RS', {
+  const todayLabel = new Date().toLocaleDateString('sr-Latn-RS', {
     weekday: 'long',
     day: 'numeric',
     month: 'long',

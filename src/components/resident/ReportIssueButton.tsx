@@ -1,12 +1,14 @@
 'use client';
 
-import { useState, useRef, useTransition } from 'react';
+
+import { useRouter } from 'next/navigation';import { useState, useRef, useTransition } from 'react';
 import { Camera, X, Check, Siren } from 'lucide-react';
 import { createTicket } from '@/app/actions/tickets';
 
 const CATEGORIES = ['Održavanje', 'Vodoinstalacije', 'Elektrika', 'Klima', 'Čišćenje', 'Ostalo'];
 
 export function ReportIssueButton({ presetCategory, compact = false }: { presetCategory?: string; compact?: boolean }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [photos, setPhotos] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
@@ -47,7 +49,7 @@ export function ReportIssueButton({ presetCategory, compact = false }: { presetC
         setError(result.error);
       } else {
         setOpen(false);
-        window.location.reload();
+        router.refresh();
       }
     });
   }
@@ -98,7 +100,7 @@ export function ReportIssueButton({ presetCategory, compact = false }: { presetC
               </div>
               <div className="mb-3">
                 <label className="field-label">Prioritet</label>
-                <select name="priority" defaultValue="Medium" className="field-input"><option value="Low">Low</option><option value="Medium">Medium</option><option value="High">High</option></select>
+                <select name="priority" defaultValue="Medium" className="field-input"><option value="Low">Nisko</option><option value="Medium">Srednje</option><option value="High">Visoko</option></select>
               </div>
               <div className="mb-3">
                 <label className="field-label">Naslov</label>

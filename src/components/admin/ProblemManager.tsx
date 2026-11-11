@@ -1,9 +1,12 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
+
+import { useRouter } from 'next/navigation';import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { ChevronDown, MessageSquare, Pencil, Search, SlidersHorizontal, X } from 'lucide-react';
 import { addTicketComment, updateTicketDetails } from '@/app/actions/admin-ops';
 import type { Profile, Ticket, TicketComment } from '@/lib/types';
+
+import { priorityLabel } from '@/lib/labels';
 
 const statuses = ['Novo', 'Zakazano', 'U toku', 'Rešeno'];
 const priorities = ['Low', 'Medium', 'High', 'Critical'];
@@ -68,7 +71,7 @@ export function ProblemManager({
           </select>
           <select value={priority} onChange={(e) => setPriority(e.target.value)} className="field-input w-auto">
             <option value="all">Svi prioriteti</option>
-            {priorities.map((p) => <option key={p}>{p}</option>)}
+            {priorities.map((p) => <option key={p} value={p}>{priorityLabel(p)}</option>)}
           </select>
         </div>
         <div className="flex flex-wrap items-center gap-2 mt-3">
@@ -112,6 +115,7 @@ export function ProblemManager({
 }
 
 function ProblemRow({ ticket, residents, comments, defaultOpen }: { ticket: Ticket; residents: Profile[]; comments: TicketComment[]; defaultOpen: boolean }) {
+  const router = useRouter();
   const [open, setOpen] = useState(defaultOpen);
   const [error, setError] = useState('');
   const [pending, start] = useTransition();
@@ -141,7 +145,7 @@ function ProblemRow({ ticket, residents, comments, defaultOpen }: { ticket: Tick
     start(async () => {
       const result = await updateTicketDetails(ticket.id, values);
       if (result?.error) setError(result.error);
-      else { setError(''); setOpen(false); window.location.reload(); }
+      else { setError(''); setOpen(false); router.refresh(); }
     });
   }
 
@@ -150,7 +154,7 @@ function ProblemRow({ ticket, residents, comments, defaultOpen }: { ticket: Tick
     start(async () => {
       const result = await addTicketComment(ticket.id, body);
       if (result?.error) setError(result.error);
-      else { form.reset(); setError(''); window.location.reload(); }
+      else { form.reset(); setError(''); router.refresh(); }
     });
   }
 
@@ -176,8 +180,8 @@ function ProblemRow({ ticket, residents, comments, defaultOpen }: { ticket: Tick
         </td>
         <td className="hidden sm:table-cell">{ticket.unit}</td>
         <td><span className={`tag ${ticket.status === 'Rešeno' ? 'tag-sage' : 'tag-gold'}`}>{ticket.status}</span></td>
-        <td className="hidden md:table-cell"><span className={`tag ${ticket.priority === 'Critical' ? 'tag-brick' : 'tag-gold'}`}>{ticket.priority}</span></td>
-        <td className={`hidden md:table-cell ${overdue ? 'text-brick font-semibold' : ''}`}>{ticket.due_at ? new Date(ticket.due_at).toLocaleDateString('sr-RS') : '—'}</td>
+        <td className="hidden md:table-cell"><span className={`tag ${ticket.priority === 'Critical' ? 'tag-brick' : 'tag-gold'}`}>{priorityLabel(ticket.priority)}</span></td>
+        <td className={`hidden md:table-cell ${overdue ? 'text-brick font-semibold' : ''}`}>{ticket.due_at ? new Date(ticket.due_at).toLocaleDateString('sr-Latn-RS') : '—'}</td>
         <td className="hidden lg:table-cell">{assignee}</td>
         <td className="text-right pr-4">
           <button
@@ -197,7 +201,7 @@ function ProblemRow({ ticket, residents, comments, defaultOpen }: { ticket: Tick
               <label><span className="field-label">Kategorija</span><input name="category" defaultValue={ticket.category} className="field-input" /></label>
               <label><span className="field-label">Stan</span><input name="unit" defaultValue={ticket.unit} required className="field-input" /></label>
               <label><span className="field-label">Status</span><select name="status" defaultValue={ticket.status} className="field-input">{statuses.map((s) => <option key={s}>{s}</option>)}</select></label>
-              <label><span className="field-label">Prioritet</span><select name="priority" defaultValue={ticket.priority} className="field-input">{priorities.map((p) => <option key={p}>{p}</option>)}</select></label>
+              <label><span className="field-label">Prioritet</span><select name="priority" defaultValue={ticket.priority} className="field-input">{priorities.map((p) => <option key={p} value={p}>{priorityLabel(p)}</option>)}</select></label>
               <label><span className="field-label">Dodeljen</span><select name="assigned_to" defaultValue={ticket.assigned_to ?? ''} className="field-input"><option value="">Nedodeljen</option>{residents.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></label>
               <label><span className="field-label">Rok</span><input name="due_at" type="date" defaultValue={ticket.due_at ? ticket.due_at.slice(0, 10) : ''} className="field-input" /></label>
               <label className="sm:col-span-2"><span className="field-label">Opis</span><textarea name="description" defaultValue={ticket.description ?? ''} className="field-input" rows={3} /></label>
@@ -208,7 +212,7 @@ function ProblemRow({ ticket, residents, comments, defaultOpen }: { ticket: Tick
               {comments.map((c) => (
                 <div key={c.id} className="text-xs bg-white rounded-lg p-2.5 mb-1.5">
                   <div>{c.body}</div>
-                  <div className="text-[10px] text-ink-faint mt-1">{new Date(c.created_at).toLocaleString('sr-RS')}</div>
+                  <div className="text-[10px] text-ink-faint mt-1">{new Date(c.created_at).toLocaleString('sr-Latn-RS')}</div>
                 </div>
               ))}
               <form onSubmit={(e) => { e.preventDefault(); comment(e.currentTarget); }} className="flex gap-2 mt-2">

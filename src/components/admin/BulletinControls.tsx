@@ -1,10 +1,12 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+
+import { useRouter } from 'next/navigation';import { useState, useTransition } from 'react';
 import { Plus, X, Check, Trash2 } from 'lucide-react';
 import { createBulletinPost, deleteBulletinPost } from '@/app/actions/bulletin';
 
 export function NewBulletinButton({ buildingId, buildings }: { buildingId?: string; buildings?: { id: string; name: string }[] }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState('');
   const [isPending, startTransition] = useTransition();
@@ -16,7 +18,7 @@ export function NewBulletinButton({ buildingId, buildings }: { buildingId?: stri
       if (result?.error) setError(result.error);
       else {
         setOpen(false);
-        window.location.reload();
+        router.refresh();
       }
     });
   }
@@ -71,10 +73,11 @@ export function NewBulletinButton({ buildingId, buildings }: { buildingId?: stri
 }
 
 export function DeleteBulletinButton({ postId }: { postId: number }) {
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   return (
     <button
-      onClick={() => { if (confirm('Obrisati ovo obaveštenje?')) startTransition(async () => { await deleteBulletinPost(postId); window.location.reload(); }); }}
+      onClick={() => { if (confirm('Obrisati ovo obaveštenje?')) startTransition(async () => { await deleteBulletinPost(postId); router.refresh(); }); }}
       disabled={isPending}
       title="Obriši"
       className="w-[30px] h-[30px] rounded-full border border-line bg-white flex items-center justify-center"

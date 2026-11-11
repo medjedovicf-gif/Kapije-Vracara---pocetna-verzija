@@ -25,7 +25,7 @@ export default async function ResidentLayout({ children }: { children: React.Rea
     ? await supabase.from('buildings').select('name').eq('id', profile.building_id).single<Profile>()
     : { data: null };
 
-  const todayLabel = new Date().toLocaleDateString('sr-RS', {
+  const todayLabel = new Date().toLocaleDateString('sr-Latn-RS', {
     weekday: 'long',
     day: 'numeric',
     month: 'long',

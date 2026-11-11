@@ -1,10 +1,12 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+
+import { useRouter } from 'next/navigation';import { useState, useTransition } from 'react';
 import { Plus, X, Check, Lock, Trash2 } from 'lucide-react';
 import { createPoll, closePoll, deletePoll } from '@/app/actions/admin-polls';
 
 export function NewPollButton({ buildingId, buildings }: { buildingId?: string; buildings?: { id: string; name: string }[] }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [options, setOptions] = useState(['', '']);
   const [error, setError] = useState('');
@@ -23,7 +25,7 @@ export function NewPollButton({ buildingId, buildings }: { buildingId?: string; 
       if (result?.error) setError(result.error);
       else {
         setOpen(false);
-        window.location.reload();
+        router.refresh();
       }
     });
   }
@@ -108,13 +110,14 @@ export function NewPollButton({ buildingId, buildings }: { buildingId?: string; 
 }
 
 export function PollCardActions({ pollId, status }: { pollId: number; status: string }) {
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   return (
     <div className="flex items-center gap-2">
       {status === 'active' && (
         <button
-          onClick={() => startTransition(async () => { await closePoll(pollId); window.location.reload(); })}
+          onClick={() => startTransition(async () => { await closePoll(pollId); router.refresh(); })}
           disabled={isPending}
           title="Zatvori anketu"
           className="w-[30px] h-[30px] rounded-full border border-line bg-white flex items-center justify-center"
@@ -123,7 +126,7 @@ export function PollCardActions({ pollId, status }: { pollId: number; status: st
         </button>
       )}
       <button
-        onClick={() => { if (confirm('Obrisati ovu anketu?')) startTransition(async () => { await deletePoll(pollId); window.location.reload(); }); }}
+        onClick={() => { if (confirm('Obrisati ovu anketu?')) startTransition(async () => { await deletePoll(pollId); router.refresh(); }); }}
         disabled={isPending}
         title="Obriši anketu"
         className="w-[30px] h-[30px] rounded-full border border-line bg-white flex items-center justify-center"

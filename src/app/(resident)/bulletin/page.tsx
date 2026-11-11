@@ -59,7 +59,7 @@ export default async function BulletinPage() {
                 <span className={`tag ${b.building_id ? 'tag-gold' : 'tag-sage'}`}>
                   {b.building_id ? 'Vaša zgrada' : 'Cela platforma'}
                 </span>
-                <span className="text-[11px] text-ink-faint">{new Date(b.created_at).toLocaleDateString('sr-RS')}</span>
+                <span className="text-[11px] text-ink-faint">{new Date(b.created_at).toLocaleDateString('sr-Latn-RS')}</span>
               </div>
               <div className="flex items-start gap-2.5">
                 <Megaphone size={16} className="text-navy-950 mt-0.5 shrink-0" />

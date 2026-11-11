@@ -26,7 +26,7 @@ export async function createInvoice(formData: FormData) {
   const unit = String(formData.get('unit') || '').trim();
   const buildingId = me.role === 'superadmin' ? String(formData.get('building_id') || '').trim() : me.building_id;
   const amount = Number(formData.get('amount') || 0);
-  const month = String(formData.get('month') || '').trim() || new Date().toLocaleDateString('sr-RS', { month: 'long', year: 'numeric' });
+  const month = String(formData.get('month') || '').trim() || new Date().toLocaleDateString('sr-Latn-RS', { month: 'long', year: 'numeric' });
   const fromEmail = String(formData.get('from_email') || '').trim();
   const recipientName = String(formData.get('recipient_name') || '').trim();
   const recipientEmail = String(formData.get('recipient_email') || '').trim();

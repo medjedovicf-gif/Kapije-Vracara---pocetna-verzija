@@ -34,7 +34,7 @@ export default async function AdminBulletinPage() {
         <div key={b.id} className="card mb-3">
           <div className="flex justify-between items-center mb-1.5">
             <span className="text-[11px] text-ink-faint">
-              {new Date(b.created_at).toLocaleDateString('sr-RS')} · {b.author_name}
+              {new Date(b.created_at).toLocaleDateString('sr-Latn-RS')} · {b.author_name}
             </span>
             <DeleteBulletinButton postId={b.id} />
           </div>
