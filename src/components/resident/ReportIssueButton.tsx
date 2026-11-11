@@ -54,18 +54,18 @@ export function ReportIssueButton({ presetCategory }: { presetCategory?: string 
 
   return (
     <>
-      <button className="btn btn-gold" onClick={openModal}>
+      <button className="btn btn-gold w-full sm:w-auto" onClick={openModal}>
         <Camera size={15} />
         Prijavi kvar
       </button>
 
       {open && (
         <div
-          className="fixed inset-0 bg-navy-950/60 backdrop-blur-sm flex items-center justify-center z-[100] p-5"
+          className="fixed inset-0 bg-navy-950/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-[300] sm:p-5"
           onClick={() => setOpen(false)}
         >
           <div
-            className="bg-cream rounded-lg p-6 w-[420px] max-w-full max-h-[88vh] overflow-y-auto shadow-soft"
+            className="bg-cream rounded-t-2xl sm:rounded-lg p-5 sm:p-6 w-full sm:w-[420px] max-w-full max-h-[92dvh] sm:max-h-[88vh] overflow-y-auto overscroll-contain pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pb-6 shadow-soft"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-4">
@@ -106,8 +106,17 @@ export function ReportIssueButton({ presetCategory }: { presetCategory?: string 
                 <textarea name="description" rows={3} className="field-input" placeholder="Opišite kvar detaljnije..." />
               </div>
               <div className="mb-4">
-                <label className="field-label">Fotografije (do 5, 8MB po fajlu)</label>
-                <input ref={fileInput} type="file" accept="image/*" multiple onChange={handleFiles} className="text-sm" />
+                <span className="field-label">Fotografije (do 5, 8MB po fajlu)</span>
+                <input ref={fileInput} type="file" accept="image/*" multiple onChange={handleFiles} className="hidden" />
+                <button
+                  type="button"
+                  onClick={() => fileInput.current?.click()}
+                  disabled={photos.length >= 5}
+                  className="w-full flex items-center justify-center gap-2 rounded-xl border border-dashed border-navy-950/25 bg-white py-3 text-sm font-semibold text-navy-950 active:scale-[0.99] disabled:opacity-50"
+                >
+                  <Camera size={16} />
+                  {photos.length ? `Dodaj još (${photos.length}/5)` : 'Dodaj fotografije'}
+                </button>
                 {previews.length > 0 && (
                   <div className="flex gap-2 mt-2.5 flex-wrap">
                     {previews.map((src, i) => (
@@ -126,14 +135,17 @@ export function ReportIssueButton({ presetCategory }: { presetCategory?: string 
                   </div>
                 )}
               </div>
-              <label className="flex items-start gap-2 mb-4 p-3 rounded-xl border border-brick/30 bg-brick/5 text-xs cursor-pointer">
-                <input name="emergency" type="checkbox" className="mt-0.5" />
-                <span><span className="font-bold text-brick flex items-center gap-1"><Siren size={13} /> Prijavi hitan problem</span><span className="text-ink-soft">Koristi samo za ozbiljno curenje vode, lift, struju, požar ili bezbednosni problem.</span></span>
+              <label className="flex items-start gap-3 mb-4 p-3 rounded-xl border border-brick/30 bg-brick/5 text-xs cursor-pointer">
+                <input name="emergency" type="checkbox" className="mt-0.5 w-4 h-4 shrink-0 accent-[#B96A4A]" />
+                <span className="min-w-0">
+                  <span className="font-bold text-brick flex items-center gap-1 mb-0.5"><Siren size={13} /> Prijavi hitan problem</span>
+                  <span className="block text-ink-soft leading-snug">Koristi samo za ozbiljno curenje vode, lift, struju, požar ili bezbednosni problem.</span>
+                </span>
               </label>
 
               {error && <p className="text-brick text-xs mb-3">{error}</p>}
 
-              <div className="flex gap-2.5">
+              <div className="sticky bottom-0 -mx-5 sm:-mx-6 -mb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:-mb-6 px-5 sm:px-6 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:pb-4 bg-cream border-t border-line flex gap-2.5">
                 <button type="button" onClick={() => setOpen(false)} className="btn btn-outline flex-1">
                   Otkaži
                 </button>

@@ -28,8 +28,8 @@ export function NewBulletinButton({ buildingId, buildings }: { buildingId?: stri
         Objavi obaveštenje
       </button>
       {open && (
-        <div className="fixed inset-0 bg-navy-950/60 backdrop-blur-sm flex items-center justify-center z-[100] p-5" onClick={() => setOpen(false)}>
-          <div className="bg-cream rounded-lg p-6 w-[420px] max-w-full shadow-soft" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-navy-950/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-[300] sm:p-5" onClick={() => setOpen(false)}>
+          <div className="bg-cream rounded-t-2xl sm:rounded-lg p-5 sm:p-6 w-full sm:w-[420px] max-w-full max-h-[92dvh] sm:max-h-[88vh] overflow-y-auto overscroll-contain pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:pb-6 shadow-soft" onClick={(e) => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-display text-[19px] font-semibold text-navy-950">Novo obaveštenje</h3>
               <button onClick={() => setOpen(false)} className="w-8 h-8 rounded-full border border-line bg-white flex items-center justify-center">
