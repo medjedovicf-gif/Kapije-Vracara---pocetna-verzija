@@ -1,3 +1,7 @@
+// Nova verzija service worker-a preuzima kontrolu odmah, bez čekanja da se svi tabovi zatvore.
+self.addEventListener('install', function () { self.skipWaiting(); });
+self.addEventListener('activate', function (event) { event.waitUntil(self.clients.claim()); });
+
 self.addEventListener('push', function (event) {
   var data = event.data ? event.data.json() : { title: 'Kapije Vračara', body: 'Novo obaveštenje', url: '/' };
   event.waitUntil(self.registration.showNotification(data.title, { body: data.body, data: { url: data.url } }));
