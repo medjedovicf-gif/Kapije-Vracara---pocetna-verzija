@@ -14,7 +14,7 @@ export default async function AdminTicketsPage({ searchParams }: { searchParams:
   const sp = await searchParams;
   const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) ?? '';
   const openTicketId = Number(one(sp.ticket)) || null;
-  const initial = { status: one(sp.status) || 'all', priority: one(sp.priority) || 'all', filter: one(sp.filter) };
+  const initial = { status: one(sp.status) || 'all', priority: one(sp.priority) || 'all', filter: one(sp.filter), q: one(sp.q) };
   const supabase = await createClient();
   const user = await getSessionUser();
   if (!user) redirect('/login');
@@ -26,5 +26,5 @@ export default async function AdminTicketsPage({ searchParams }: { searchParams:
     supabase.from('ticket_comments').select('*').returns<TicketComment[]>(),
   ]);
   const units = (people ?? []).filter((p) => p.role === 'resident').map((p) => p.unit).filter((u): u is string => !!u);
-  return <div><div className="flex flex-wrap gap-3 justify-between items-center mb-5"><div><h2 className="font-display text-2xl font-semibold text-navy-950">Problemi</h2><p className="text-ink-soft text-sm mt-1">Upravljanje problemima, rokovima, prioritetima, dodelama i komentarima.</p></div><NewTicketButton units={units} /></div><ProblemManager key={`${openTicketId ?? ''}|${initial.status}|${initial.priority}|${initial.filter}`} tickets={tickets ?? []} residents={people ?? []} comments={comments ?? []} openTicketId={openTicketId} initial={initial} /></div>;
+  return <div><div className="flex flex-wrap gap-3 justify-between items-center mb-5"><div><h2 className="font-display text-2xl font-semibold text-navy-950">Problemi</h2><p className="text-ink-soft text-sm mt-1">Upravljanje problemima, rokovima, prioritetima, dodelama i komentarima.</p></div><NewTicketButton units={units} /></div><ProblemManager key={`${openTicketId ?? ''}|${initial.status}|${initial.priority}|${initial.filter}|${initial.q}`} tickets={tickets ?? []} residents={people ?? []} comments={comments ?? []} openTicketId={openTicketId} initial={initial} /></div>;
 }

@@ -11,7 +11,7 @@ import { priorityLabel } from '@/lib/labels';
 const statuses = ['Novo', 'Zakazano', 'U toku', 'Rešeno'];
 const priorities = ['Low', 'Medium', 'High', 'Critical'];
 
-type Initial = { status: string; priority: string; filter: string };
+type Initial = { status: string; priority: string; filter: string; q?: string };
 
 export function ProblemManager({
   tickets,
@@ -26,7 +26,7 @@ export function ProblemManager({
   openTicketId?: number | null;
   initial?: Initial;
 }) {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(initial.q ?? '');
   const [status, setStatus] = useState(initial.status);
   const [priority, setPriority] = useState(initial.priority);
   const [onlyOverdue, setOnlyOverdue] = useState(initial.filter === 'overdue');
