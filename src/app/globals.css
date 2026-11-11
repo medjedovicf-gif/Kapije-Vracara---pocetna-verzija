@@ -3,8 +3,16 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+  }
   body {
     @apply bg-cream text-ink;
+  }
+  /* Bez kašnjenja i double-tap zoom-a na dodir. */
+  a, button, select, label, summary, [role='button'] {
+    touch-action: manipulation;
   }
 }
 
@@ -23,6 +31,13 @@
   }
   .card {
     @apply bg-white rounded-md shadow-card border border-line p-5;
+  }
+  /* Kartica/red koji vodi negde: jasan hover i "pritisak" kao u aplikaciji. */
+  .card-link {
+    @apply block cursor-pointer select-none transition duration-150 hover:shadow-soft hover:border-navy-950/20 active:scale-[0.985];
+  }
+  .row-link {
+    @apply cursor-pointer select-none transition-colors duration-150 hover:bg-cream-2/70 active:bg-cream-2;
   }
   .tag {
     @apply font-mono text-[10px] tracking-wide uppercase px-2.5 py-1 rounded-full font-semibold whitespace-nowrap;

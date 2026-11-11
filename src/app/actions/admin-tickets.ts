@@ -48,17 +48,17 @@ export async function createTicketByStaff(formData: FormData) {
 
   if (!unit || !title || !buildingId) return { error: 'Popunite stan, naslov i zgradu.' };
 
-  const { error } = await supabase.from('tickets').insert({
+  const { data: created, error } = await supabase.from('tickets').insert({
     unit,
     building_id: buildingId,
     title,
     category,
     status: 'Novo',
     priority: 'Medium',
-  } as never);
+  } as never).select('id').single<{ id: number }>();
   if (error) return { error: error.message };
 
-  await notifyStaffForBuilding(buildingId, { type: 'ticket.created', icon: 'wrench', title: 'Novi zahtev za servis', sub: `Stan ${unit} · ${category}`, target: '/admin/tickets', persistent: true });
+  await notifyStaffForBuilding(buildingId, { type: 'ticket.created', icon: 'wrench', title: 'Novi zahtev za servis', sub: `Stan ${unit} · ${category}`, target: created ? `/admin/tickets?ticket=${created.id}` : '/admin/tickets', persistent: true });
   await supabase.from('audit_logs').insert({ actor_id: me.id, action: 'ticket.created', entity_type: 'ticket', summary: `Admin je kreirao novi problem za stan ${unit}.`, after_value: { title, category, unit, building_id: buildingId } } as never);
 
   revalidatePath('/admin/tickets');

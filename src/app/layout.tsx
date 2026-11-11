@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Fraunces, Inter, IBM_Plex_Mono } from 'next/font/google';
 import './globals.css';
 
@@ -21,6 +21,15 @@ const plexMono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   title: 'Kapije Vračara — Resident Hub',
   description: 'Platforma za stanare, administratore i upravu zgrade.',
+};
+
+// Ponašanje kao aplikacija: bez pinch/double-tap zoom-a i bez auto-zoom-a na poljima za unos (iOS).
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
