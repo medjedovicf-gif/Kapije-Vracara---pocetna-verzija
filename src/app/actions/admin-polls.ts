@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import type { Profile } from '@/lib/types';
+import { notifyAllResidents, notifyResidentsForBuilding } from '@/lib/notifications';
 
 async function requireStaff() {
   const supabase = await createClient();
@@ -41,6 +42,10 @@ export async function createPoll(formData: FormData) {
     .from('poll_options')
     .insert(options.map((label) => ({ poll_id: poll.id, label, votes: 0 })) as never);
   if (optError) return { error: optError.message };
+
+  const notice = { type: 'poll.created', icon: 'bell', title: 'Nova anketa', sub: title, target: '/bulletin' };
+  if (buildingId) await notifyResidentsForBuilding(buildingId, notice);
+  else await notifyAllResidents(notice);
 
   revalidatePath('/admin/polls');
   revalidatePath('/super-admin/polls');

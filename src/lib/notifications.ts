@@ -75,6 +75,12 @@ export async function notifyResidentsForBuilding(buildingId: string, input: Omit
   await createNotifications({ ...input, recipientIds: (data ?? []).map((p: { id: string }) => p.id) });
 }
 
+export async function notifyAllResidents(input: Omit<NotificationInput, 'recipientIds'>) {
+  const admin = createAdminClient();
+  const { data } = await admin.from('profiles').select('id').eq('role', 'resident');
+  await createNotifications({ ...input, recipientIds: (data ?? []).map((p: { id: string }) => p.id) });
+}
+
 export async function notifyUser(recipientId: string, input: Omit<NotificationInput, 'recipientIds'>) {
   await createNotifications({ ...input, recipientIds: [recipientId] });
 }
