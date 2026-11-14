@@ -11,6 +11,23 @@ export interface Building {
   id: string;
   name: string;
   created_at: string;
+  code?: string | null;
+  address?: string | null;
+  city?: string | null;
+  municipality?: string | null;
+  postal_code?: string | null;
+  bank_account?: string | null;
+  email?: string | null;
+  year_built?: number | null;
+  elevator_count?: number | null;
+  management_type?: string | null;
+  floors?: string | null;
+  heating_type?: string | null;
+  tax_id?: string | null;
+  registration_number?: string | null;
+  opening_balance?: number | null;
+  opening_balance_date?: string | null;
+  comment?: string | null;
 }
 
 export interface Profile {
