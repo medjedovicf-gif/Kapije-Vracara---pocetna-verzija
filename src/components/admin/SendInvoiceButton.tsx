@@ -6,6 +6,7 @@ import { useState, useTransition } from 'react';
 import { Check, Eye, FileText, Pencil, Plus, ReceiptText, Send, Trash2, X } from 'lucide-react';
 import { addBankStatement, createInvoice, recordManualInvoicePayment, updateInvoice } from '@/app/actions/invoices';
 import type { Invoice, InvoiceLineItem, Profile } from '@/lib/types';
+import { formatDate } from '@/lib/format';
 
 type Draft = {
   from_email: string;
@@ -248,7 +249,7 @@ function InvoicePreview({ unit, data, status }: { unit: string; data: Draft; sta
         {!items.length && <div className="p-3 text-sm text-ink-faint">Nema stavki.</div>}
       </div>
       <div className="flex justify-between text-sm mb-2"><span className="font-semibold">Ukupno za uplatu</span><span className="font-mono font-bold">{rsd(total)}</span></div>
-      <div className="flex justify-between text-[12.5px] text-ink-soft"><span>Rok plaćanja</span><span>{data.due_date ? new Date(`${data.due_date}T00:00:00`).toLocaleDateString('sr-Latn-RS') : 'Nije unet'}</span></div>
+      <div className="flex justify-between text-[12.5px] text-ink-soft"><span>Rok plaćanja</span><span>{data.due_date ? formatDate(data.due_date) : 'Nije unet'}</span></div>
       {data.description && <div className="mt-6 rounded-md bg-cream-2 p-4 text-[12.5px] text-ink whitespace-pre-line">{data.description}</div>}
     </div>
   );

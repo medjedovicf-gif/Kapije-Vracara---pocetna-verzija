@@ -5,6 +5,7 @@ import { Sidebar } from '@/components/resident/Sidebar';
 import { NotificationBell } from '@/components/NotificationBell';
 import { DashboardShell } from '@/components/DashboardShell';
 import type { Profile } from '@/lib/types';
+import { formatDate } from '@/lib/format';
 
 // Ove stranice prikazuju licne podatke ulogovanog korisnika — nikad ih ne kesiraj,
 // ni na serveru ni u browseru, da se slucajno ne prikaze tudji keširan sadrzaj
@@ -25,12 +26,7 @@ export default async function ResidentLayout({ children }: { children: React.Rea
     ? await supabase.from('buildings').select('name').eq('id', profile.building_id).single<Profile>()
     : { data: null };
 
-  const todayLabel = new Date().toLocaleDateString('sr-Latn-RS', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
+  const todayLabel = formatDate(new Date());
 
   return (
     <DashboardShell

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { AlertTriangle, Bell, Check, CheckCheck, ChevronRight, Clock3, Inbox, Megaphone, Receipt, UserX, Wrench, X } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import type { AppNotification, Ticket } from '@/lib/types';
+import { formatDateTime } from '@/lib/format';
 
 type Category = 'critical' | 'overdue' | 'ticket' | 'other';
 
@@ -40,13 +41,7 @@ function labelOf(n: AppNotification) {
 }
 
 function timeAgo(iso: string) {
-  const diff = Math.max(0, Date.now() - new Date(iso).getTime());
-  const m = Math.floor(diff / 60000);
-  if (m < 1) return 'upravo';
-  if (m < 60) return `pre ${m} min`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `pre ${h} h`;
-  return new Date(iso).toLocaleDateString('sr-Latn-RS', { day: 'numeric', month: 'short' });
+  return formatDateTime(iso);
 }
 
 function dayGroup(iso: string) {

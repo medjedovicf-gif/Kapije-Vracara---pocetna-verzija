@@ -5,6 +5,7 @@ import { AdminSidebar } from '@/components/admin/Sidebar';
 import { NotificationBell } from '@/components/NotificationBell';
 import { DashboardShell } from '@/components/DashboardShell';
 import type { Profile } from '@/lib/types';
+import { formatDate } from '@/lib/format';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -23,12 +24,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     ? (await supabase.from('buildings').select('name').eq('id', profile.building_id).single()) as unknown as { data: { name: string } | null }
     : { data: null };
 
-  const todayLabel = new Date().toLocaleDateString('sr-Latn-RS', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
+  const todayLabel = formatDate(new Date());
 
   return (
     <DashboardShell

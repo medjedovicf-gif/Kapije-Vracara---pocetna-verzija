@@ -7,6 +7,7 @@ import { addTicketComment, updateTicketDetails } from '@/app/actions/admin-ops';
 import type { Profile, Ticket, TicketComment } from '@/lib/types';
 
 import { priorityLabel } from '@/lib/labels';
+import { formatDateTime, formatDate } from '@/lib/format';
 
 const statuses = ['Novo', 'Zakazano', 'U toku', 'Rešeno'];
 const priorities = ['Low', 'Medium', 'High', 'Critical'];
@@ -181,7 +182,7 @@ function ProblemRow({ ticket, residents, comments, defaultOpen }: { ticket: Tick
         <td className="hidden sm:table-cell">{ticket.unit}</td>
         <td><span className={`tag ${ticket.status === 'Rešeno' ? 'tag-sage' : 'tag-gold'}`}>{ticket.status}</span></td>
         <td className="hidden md:table-cell"><span className={`tag ${ticket.priority === 'Critical' ? 'tag-brick' : 'tag-gold'}`}>{priorityLabel(ticket.priority)}</span></td>
-        <td className={`hidden md:table-cell ${overdue ? 'text-brick font-semibold' : ''}`}>{ticket.due_at ? new Date(ticket.due_at).toLocaleDateString('sr-Latn-RS') : '—'}</td>
+        <td className={`hidden md:table-cell ${overdue ? 'text-brick font-semibold' : ''}`}>{ticket.due_at ? formatDate(ticket.due_at) : '—'}</td>
         <td className="hidden lg:table-cell">{assignee}</td>
         <td className="text-right pr-4">
           <button
@@ -212,7 +213,7 @@ function ProblemRow({ ticket, residents, comments, defaultOpen }: { ticket: Tick
               {comments.map((c) => (
                 <div key={c.id} className="text-xs bg-white rounded-lg p-2.5 mb-1.5">
                   <div>{c.body}</div>
-                  <div className="text-[10px] text-ink-faint mt-1">{new Date(c.created_at).toLocaleString('sr-Latn-RS')}</div>
+                  <div className="text-[10px] text-ink-faint mt-1">{formatDateTime(c.created_at)}</div>
                 </div>
               ))}
               <form onSubmit={(e) => { e.preventDefault(); comment(e.currentTarget); }} className="flex gap-2 mt-2">

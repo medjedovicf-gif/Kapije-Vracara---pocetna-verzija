@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { Megaphone } from 'lucide-react';
 import type { Profile, BulletinPost, Poll, PollOption } from '@/lib/types';
 import { PollWidget } from '@/components/resident/PollWidget';
+import { formatDateTime } from '@/lib/format';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -59,7 +60,7 @@ export default async function BulletinPage() {
                 <span className={`tag ${b.building_id ? 'tag-gold' : 'tag-sage'}`}>
                   {b.building_id ? 'Vaša zgrada' : 'Cela platforma'}
                 </span>
-                <span className="text-[11px] text-ink-faint">{new Date(b.created_at).toLocaleDateString('sr-Latn-RS')}</span>
+                <span className="text-[11px] text-ink-faint">{formatDateTime(b.created_at)}</span>
               </div>
               <div className="flex items-start gap-2.5">
                 <Megaphone size={16} className="text-navy-950 mt-0.5 shrink-0" />

@@ -3,6 +3,7 @@ import { getMyProfile, getSessionUser } from '@/lib/session';
 import { redirect } from 'next/navigation';
 import type { Profile, BulletinPost } from '@/lib/types';
 import { NewBulletinButton, DeleteBulletinButton } from '@/components/admin/BulletinControls';
+import { formatDateTime } from '@/lib/format';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -34,7 +35,7 @@ export default async function AdminBulletinPage() {
         <div key={b.id} className="card mb-3">
           <div className="flex justify-between items-center mb-1.5">
             <span className="text-[11px] text-ink-faint">
-              {new Date(b.created_at).toLocaleDateString('sr-Latn-RS')} · {b.author_name}
+              {formatDateTime(b.created_at)} · {b.author_name}
             </span>
             <DeleteBulletinButton postId={b.id} />
           </div>

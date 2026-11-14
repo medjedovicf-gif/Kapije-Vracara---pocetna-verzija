@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Bell, Wrench, Megaphone, Receipt, X, Smartphone } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import type { AppNotification } from '@/lib/types';
+import { formatDateTime } from '@/lib/format';
 
 const ICONS: Record<string, typeof Bell> = { wrench: Wrench, megaphone: Megaphone, receipt: Receipt, bell: Bell };
 
@@ -76,5 +77,5 @@ export function NotificationBell({ userId, role = 'resident' }: { userId: string
   </>;
 }
 
-function formatDate(value: string) { return new Date(value).toLocaleString('sr-Latn-RS', { day: 'numeric', month: '2-digit', hour: '2-digit', minute: '2-digit' }); }
+function formatDate(value: string) { return formatDateTime(value); }
 function decodeKey(value: string) { const padding = '='.repeat((4 - value.length % 4) % 4); const raw = atob((value + padding).replace(/-/g, '+').replace(/_/g, '/')); return Uint8Array.from([...raw].map((c) => c.charCodeAt(0))); }
