@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
-import type { Profile } from '@/lib/types';
+import type { InvoiceLineItem, Profile } from '@/lib/types';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createNotifications } from '@/lib/notifications';
 
@@ -18,6 +18,43 @@ async function requireInvoiceStaff() {
   return { supabase, user, me } as const;
 }
 
+/** Stavke iz forme (JSON niz). Prazne i neispravne se preskaču. */
+function parseLineItems(formData: FormData): InvoiceLineItem[] {
+  try {
+    const raw = JSON.parse(String(formData.get('line_items') || '[]'));
+    if (!Array.isArray(raw)) return [];
+    return raw
+      .map((x) => ({ label: String(x?.label ?? '').trim().slice(0, 200), amount: Math.round(Number(x?.amount) * 100) / 100 }))
+      .filter((x) => x.label && Number.isFinite(x.amount) && x.amount !== 0)
+      .slice(0, 30);
+  } catch {
+    return [];
+  }
+}
+
+/** Zajednička polja za novu i izmenjenu fakturu. Iznos je zbir stavki kad stavke postoje. */
+function invoiceFields(formData: FormData) {
+  const items = parseLineItems(formData);
+  const amount = items.length ? items.reduce((a, x) => a + x.amount, 0) : Number(formData.get('amount') || 0);
+  return {
+    items,
+    fields: {
+      amount: Math.round(amount * 100) / 100,
+      month: String(formData.get('month') || '').trim() || new Date().toLocaleDateString('sr-Latn-RS', { month: 'long', year: 'numeric' }),
+      from_email: String(formData.get('from_email') || '').trim(),
+      recipient_name: String(formData.get('recipient_name') || '').trim() || null,
+      recipient_email: String(formData.get('recipient_email') || '').trim() || null,
+      description: String(formData.get('description') || '').trim() || null,
+      due_date: String(formData.get('due_date') || '').trim() || null,
+    },
+  };
+}
+
+/** Ako kolona line_items još ne postoji u bazi, stavke idu u opis da se ne izgube. */
+const missingLineItemsColumn = (e: { message?: string; code?: string } | null) => !!e && (e.code === 'PGRST204' || /line_items/.test(e.message ?? ''));
+const itemsAsText = (items: InvoiceLineItem[], description: string | null) =>
+  [description, ...items.map((x) => `• ${x.label}: ${x.amount.toLocaleString('de-DE')} RSD`)].filter(Boolean).join('\n');
+
 export async function createInvoice(formData: FormData) {
   const ctx = await requireInvoiceStaff();
   if ('error' in ctx) return ctx;
@@ -25,28 +62,16 @@ export async function createInvoice(formData: FormData) {
 
   const unit = String(formData.get('unit') || '').trim();
   const buildingId = me.role === 'superadmin' ? String(formData.get('building_id') || '').trim() : me.building_id;
-  const amount = Number(formData.get('amount') || 0);
-  const month = String(formData.get('month') || '').trim() || new Date().toLocaleDateString('sr-Latn-RS', { month: 'long', year: 'numeric' });
-  const fromEmail = String(formData.get('from_email') || '').trim();
-  const recipientName = String(formData.get('recipient_name') || '').trim();
-  const recipientEmail = String(formData.get('recipient_email') || '').trim();
-  const description = String(formData.get('description') || '').trim();
-  const dueDate = String(formData.get('due_date') || '').trim();
+  const { items, fields } = invoiceFields(formData);
+  const { amount, month } = fields;
 
-  if (!unit || !buildingId || amount <= 0 || !fromEmail) return { error: 'Unesite stan, zgradu, iznos i email pošiljaoca.' };
+  if (!unit || !buildingId || amount <= 0 || !fields.from_email) return { error: 'Unesite stan, zgradu, iznos i email pošiljaoca.' };
 
-  const { error } = await supabase.from('invoices').insert({
-    unit,
-    building_id: buildingId,
-    amount,
-    month,
-    status: 'Poslata',
-    from_email: fromEmail,
-    recipient_name: recipientName || null,
-    recipient_email: recipientEmail || null,
-    description: description || null,
-    due_date: dueDate || null,
-  } as never);
+  const base = { ...fields, unit, building_id: buildingId, status: 'Poslata' };
+  let { error } = await supabase.from('invoices').insert({ ...base, line_items: items.length ? items : null } as never);
+  if (missingLineItemsColumn(error)) {
+    ({ error } = await supabase.from('invoices').insert({ ...base, description: itemsAsText(items, fields.description) || null } as never));
+  }
   if (error) return { error: error.message };
 
   const admin = createAdminClient();
@@ -55,6 +80,38 @@ export async function createInvoice(formData: FormData) {
 
   revalidatePath('/admin/payments');
   revalidatePath('/super-admin/payments');
+  return { success: true };
+}
+
+export async function updateInvoice(invoiceId: number, formData: FormData) {
+  const ctx = await requireInvoiceStaff();
+  if ('error' in ctx) return ctx;
+  const { supabase, me } = ctx;
+
+  let query = supabase.from('invoices').select('id, unit, building_id, status').eq('id', invoiceId);
+  if (me.role !== 'superadmin') query = query.eq('building_id', me.building_id ?? '');
+  const { data: current } = await query.maybeSingle<{ id: number; unit: string; building_id: string; status: string }>();
+  if (!current) return { error: 'Faktura nije pronađena.' };
+  if (current.status === 'Plaćena') return { error: 'Plaćena faktura ne može da se menja.' };
+
+  const { items, fields } = invoiceFields(formData);
+  if (fields.amount <= 0 || !fields.from_email) return { error: 'Unesite iznos i email pošiljaoca.' };
+
+  let { error } = await supabase.from('invoices').update({ ...fields, line_items: items.length ? items : null } as never).eq('id', invoiceId);
+  if (missingLineItemsColumn(error)) {
+    ({ error } = await supabase.from('invoices').update({ ...fields, description: itemsAsText(items, fields.description) || null } as never).eq('id', invoiceId));
+  }
+  if (error) return { error: error.message };
+
+  await supabase.from('audit_logs').insert({ actor_id: me.id, action: 'invoice.updated', entity_type: 'invoice', entity_id: String(invoiceId), summary: `Izmenjena faktura za stan ${current.unit}: ${fields.amount.toLocaleString('de-DE')} RSD.` } as never);
+
+  const admin = createAdminClient();
+  const { data: residents } = await admin.from('profiles').select('id').eq('role', 'resident').eq('building_id', current.building_id).eq('unit', current.unit);
+  await createNotifications({ recipientIds: (residents ?? []).map((r: { id: string }) => r.id), type: 'invoice.updated', icon: 'receipt', title: 'Faktura je izmenjena', sub: `${fields.amount.toLocaleString('de-DE')} RSD · ${fields.month}`, target: '/payments' });
+
+  revalidatePath('/admin/payments');
+  revalidatePath('/super-admin/payments');
+  revalidatePath('/payments');
   return { success: true };
 }
 

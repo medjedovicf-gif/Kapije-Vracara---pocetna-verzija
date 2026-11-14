@@ -61,7 +61,7 @@ export default async function AdminPaymentsPage() {
       </div>
 
       <div className="card">
-        <div className="overflow-x-auto"><table className="min-w-[640px] w-full text-[13px]">
+        <div className="overflow-x-auto"><table className="min-w-[860px] w-full text-[13px]">
           <thead>
             <tr className="text-left font-mono text-[10.5px] uppercase tracking-wide text-ink-faint border-b border-line">
               <th className="pb-2.5 font-semibold">Stan</th>

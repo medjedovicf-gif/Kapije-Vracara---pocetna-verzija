@@ -67,6 +67,14 @@ export default async function PaymentsPage() {
                         <div>
                           <div className="font-semibold">{inv.month}</div>
                           <div className="text-[11px] text-ink-faint">{new Date(inv.created_at).toLocaleDateString('sr-Latn-RS')}</div>
+                          {!!inv.line_items?.length && (
+                            <ul className="mt-1 space-y-0.5">
+                              {inv.line_items.map((x, i) => (
+                                <li key={i} className="text-[11.5px] text-ink-soft">{x.label}: <span className="font-mono">{Number(x.amount).toLocaleString('de-DE')} RSD</span></li>
+                              ))}
+                            </ul>
+                          )}
+                          {inv.description && <div className="text-[11.5px] text-ink-soft mt-0.5 whitespace-pre-line">{inv.description}</div>}
                         </div>
                       </div>
                     </td>

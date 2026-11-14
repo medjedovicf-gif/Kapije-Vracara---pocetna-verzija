@@ -125,7 +125,13 @@ export interface Invoice {
   description: string | null;
   due_date: string | null;
   paid_at: string | null;
+  line_items?: InvoiceLineItem[] | null;
   created_at: string;
+}
+
+export interface InvoiceLineItem {
+  label: string;
+  amount: number;
 }
 
 export interface InvoicePayment {
