@@ -154,6 +154,40 @@ export interface BankStatement {
   created_at: string;
 }
 
+export type ExpenseStatus = 'Neplaćeno' | 'Plaćeno';
+export interface BuildingExpense {
+  id: number;
+  building_id: string;
+  supplier: string;
+  invoice_number: string | null;
+  category: string;
+  description: string | null;
+  amount: number;
+  issue_date: string;
+  due_date: string | null;
+  status: ExpenseStatus;
+  paid_at: string | null;
+  file_path: string | null;
+  planned_work_id: number | null;
+  created_by: string | null;
+  created_at: string;
+}
+
+export type PlannedWorkStatus = 'Planirano' | 'U toku' | 'Završeno' | 'Otkazano';
+export interface PlannedWork {
+  id: number;
+  building_id: string;
+  title: string;
+  description: string | null;
+  category: string;
+  contractor: string | null;
+  estimated_cost: number;
+  planned_date: string | null;
+  status: PlannedWorkStatus;
+  created_by: string | null;
+  created_at: string;
+}
+
 export interface PermissionRow {
   key: string;
   value: boolean;
@@ -209,6 +243,8 @@ export interface Database {
       invoices: Table<Invoice>;
       invoice_payments: Table<InvoicePayment>;
       bank_statements: Table<BankStatement>;
+      building_expenses: Table<BuildingExpense>;
+      planned_works: Table<PlannedWork>;
       permissions: Table<PermissionRow>;
       notifications: Table<AppNotification>;
       push_subscriptions: Table<PushSubscriptionRow>;

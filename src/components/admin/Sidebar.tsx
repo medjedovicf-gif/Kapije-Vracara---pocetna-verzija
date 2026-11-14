@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, Wrench, Vote, Megaphone, Wallet, LogOut, Inbox, Building2, BarChart3, Activity } from 'lucide-react';
+import { LayoutDashboard, Users, Wrench, Vote, Megaphone, Wallet, LogOut, Inbox, Building2, BarChart3, Activity, ReceiptText, HardHat } from 'lucide-react';
 import { GateMark } from '@/components/GateMark';
 import { logout } from '@/app/actions/auth';
 
@@ -16,6 +16,8 @@ const NAV = [
   { href: '/admin/polls', label: 'Ankete', icon: Vote },
   { href: '/admin/bulletin', label: 'Oglasna tabla', icon: Megaphone },
   { href: '/admin/payments', label: 'Uplate', icon: Wallet },
+  { href: '/admin/expenses', label: 'Fakture i troškovi', icon: ReceiptText },
+  { href: '/admin/planned-works', label: 'Planirani radovi', icon: HardHat },
   { href: '/admin/reports', label: 'Izveštaji', icon: BarChart3 },
   { href: '/admin/activity', label: 'Dnevnik aktivnosti', icon: Activity },
 ];
