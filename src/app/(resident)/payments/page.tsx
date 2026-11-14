@@ -1,9 +1,11 @@
 import { createClient } from '@/lib/supabase/server';
 import { getMyProfile, getSessionUser } from '@/lib/session';
 import { redirect } from 'next/navigation';
-import { CreditCard, Receipt, CheckCircle2, Clock } from 'lucide-react';
+import { Receipt, CheckCircle2, Clock } from 'lucide-react';
 import type { Profile, Invoice } from '@/lib/types';
 import { formatDateTime } from '@/lib/format';
+import { PayInvoiceButton } from '@/components/resident/PayInvoiceButton';
+import type { BillingSettings } from '@/lib/ips';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -16,13 +18,19 @@ export default async function PaymentsPage() {
   const profile = await getMyProfile();
   if (!profile) redirect('/login');
 
-  const { data: invoices } = await supabase
+  const [{ data: invoices }, { data: billing }] = await Promise.all([
+    supabase
     .from('invoices')
     .select('*')
     .eq('unit', profile.unit ?? '')
     .eq('building_id', profile.building_id ?? '')
     .order('created_at', { ascending: false })
-    .returns<Invoice[]>();
+    .returns<Invoice[]>(),
+    supabase.from('building_billing_settings').select('*').eq('building_id', profile.building_id ?? '').maybeSingle<BillingSettings>(),
+  ]);
+  const payable = (inv: Invoice) => inv.status !== 'Plaćena';
+  const firstUnpaid = (invoices ?? []).filter(payable).at(-1) ?? null;
+  const billingReady = billing && billing.payee_name && billing.bank_account ? billing : null;
 
   return (
     <div>
@@ -37,10 +45,7 @@ export default async function PaymentsPage() {
             {profile.balance.toLocaleString('de-DE')} <span className="text-base font-medium">RSD</span>
           </div>
           <div className="text-xs text-gold mb-5">{profile.payment_status}</div>
-          <button className="btn btn-gold w-full">
-            <CreditCard size={16} />
-            Plati odmah
-          </button>
+          <PayInvoiceButton variant="hero" invoice={firstUnpaid} billing={billingReady} />
         </div>
 
         <div className="card">
@@ -81,10 +86,13 @@ export default async function PaymentsPage() {
                     </td>
                     <td className="py-3 text-right font-mono font-bold">{inv.amount.toLocaleString('de-DE')} RSD</td>
                     <td className="py-3 text-right">
-                      <span className="tag tag-sage inline-flex items-center gap-1">
-                        <CheckCircle2 size={11} />
-                        {inv.status}
-                      </span>
+                      <div className="flex items-center justify-end gap-2">
+                        {payable(inv) && <PayInvoiceButton invoice={inv} billing={billingReady} />}
+                        <span className={`tag inline-flex items-center gap-1 ${payable(inv) ? 'tag-gold' : 'tag-sage'}`}>
+                          {payable(inv) ? <Clock size={11} /> : <CheckCircle2 size={11} />}
+                          {inv.status}
+                        </span>
+                      </div>
                     </td>
                   </tr>
                 ))}

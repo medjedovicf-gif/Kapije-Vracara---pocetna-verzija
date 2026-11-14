@@ -7,6 +7,8 @@ import { Check, Eye, FileText, Pencil, Plus, ReceiptText, Send, Trash2, X } from
 import { addBankStatement, createInvoice, recordManualInvoicePayment, updateInvoice } from '@/app/actions/invoices';
 import type { Invoice, InvoiceLineItem, Profile } from '@/lib/types';
 import { formatDate } from '@/lib/format';
+import { PaymentBlock } from '@/components/PaymentBlock';
+import type { BillingSettings } from '@/lib/ips';
 
 type Draft = {
   from_email: string;
@@ -35,7 +37,7 @@ function draftFromInvoice(inv: Invoice): Draft {
 }
 
 /** Dugmad u redu stanara: nova faktura, pregled i izmena poslednje izdate fakture. */
-export function SendInvoiceButton({ resident, latestInvoice }: { resident: Profile; latestInvoice?: Invoice }) {
+export function SendInvoiceButton({ resident, latestInvoice, billing = null }: { resident: Profile; latestInvoice?: Invoice; billing?: BillingSettings | null }) {
   const [mode, setMode] = useState<null | 'new' | 'edit' | 'view'>(null);
   const [sent, setSent] = useState(false);
   const paid = latestInvoice?.status === 'Plaćena';
@@ -61,7 +63,7 @@ export function SendInvoiceButton({ resident, latestInvoice }: { resident: Profi
 
       {mode === 'view' && latestInvoice && (
         <Modal title={`Faktura za stan ${resident.unit} · ${latestInvoice.month}`} onClose={() => setMode(null)} width="sm:w-[640px]">
-          <InvoicePreview unit={resident.unit ?? ''} data={draftFromInvoice(latestInvoice)} status={latestInvoice.status} />
+          <InvoicePreview unit={resident.unit ?? ''} data={draftFromInvoice(latestInvoice)} status={latestInvoice.status} billing={billing} invoiceId={latestInvoice.id} />
           <div className="flex justify-end gap-2 mt-4">
             <button onClick={() => setMode(null)} className="btn btn-outline">Zatvori</button>
             {!paid && <button onClick={() => setMode('edit')} className="btn btn-navy"><Pencil size={14} /> Izmeni</button>}
@@ -75,6 +77,8 @@ export function SendInvoiceButton({ resident, latestInvoice }: { resident: Profi
             resident={resident}
             initial={draftFromInvoice(latestInvoice)}
             submitLabel="Sačuvaj izmene"
+            billing={billing}
+            invoiceId={latestInvoice.id}
             onSubmit={(fd) => updateInvoice(latestInvoice.id, fd)}
             onDone={() => setMode(null)}
           />
@@ -95,6 +99,7 @@ export function SendInvoiceButton({ resident, latestInvoice }: { resident: Profi
               items: [{ label: 'Mesečno održavanje zgrade', amount: String(Math.max(0, resident.balance || 0)) }],
             }}
             submitLabel="Pošalji fakturu"
+            billing={billing}
             onSubmit={createInvoice}
             onDone={() => { setMode(null); setSent(true); setTimeout(() => setSent(false), 2500); }}
             extra={
@@ -124,7 +129,9 @@ function Modal({ title, onClose, children, width = 'sm:w-[1000px]' }: { title: s
   );
 }
 
-function InvoiceEditor({ resident, initial, submitLabel, onSubmit, onDone, extra }: {
+function InvoiceEditor({ resident, initial, submitLabel, onSubmit, onDone, extra, billing = null, invoiceId }: {
+  billing?: BillingSettings | null;
+  invoiceId?: number;
   resident: Profile;
   initial: Draft;
   submitLabel: string;
@@ -208,7 +215,7 @@ function InvoiceEditor({ resident, initial, submitLabel, onSubmit, onDone, extra
         {extra}
       </div>
 
-      <InvoicePreview unit={resident.unit ?? ''} data={draft} />
+      <InvoicePreview unit={resident.unit ?? ''} data={draft} billing={billing} invoiceId={invoiceId} />
     </div>
   );
 }
@@ -217,7 +224,7 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
   return <div><label className="field-label">{label}</label>{children}</div>;
 }
 
-function InvoicePreview({ unit, data, status }: { unit: string; data: Draft; status?: string }) {
+function InvoicePreview({ unit, data, status, billing = null, invoiceId }: { unit: string; data: Draft; status?: string; billing?: BillingSettings | null; invoiceId?: number }) {
   const items = data.items.filter((x) => x.label.trim() || Number(x.amount));
   const total = sumItems(items);
   return (
@@ -251,6 +258,7 @@ function InvoicePreview({ unit, data, status }: { unit: string; data: Draft; sta
       <div className="flex justify-between text-sm mb-2"><span className="font-semibold">Ukupno za uplatu</span><span className="font-mono font-bold">{rsd(total)}</span></div>
       <div className="flex justify-between text-[12.5px] text-ink-soft"><span>Rok plaćanja</span><span>{data.due_date ? formatDate(data.due_date) : 'Nije unet'}</span></div>
       {data.description && <div className="mt-6 rounded-md bg-cream-2 p-4 text-[12.5px] text-ink whitespace-pre-line">{data.description}</div>}
+      {billing && <PaymentBlock billing={billing} unit={unit} invoiceId={invoiceId} amount={total} payer={data.recipient_name} month={data.month} paid={status === 'Plaćena'} />}
     </div>
   );
 }

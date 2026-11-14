@@ -126,6 +126,7 @@ export interface Invoice {
   due_date: string | null;
   paid_at: string | null;
   line_items?: InvoiceLineItem[] | null;
+  period?: string | null;
   created_at: string;
 }
 
@@ -222,6 +223,8 @@ export interface PushSubscriptionRow {
   created_at: string;
 }
 
+import type { BillingSettings } from './ips';
+
 // Minimalan Database tip da @supabase/ssr klijenti budu tipizirani.
 // Nije 100% kompletan Supabase generated tip, ali dovoljan za select/insert/update sa .from('table').
 type Table<T> = {
@@ -251,6 +254,7 @@ export interface Database {
       bank_statements: Table<BankStatement>;
       building_expenses: Table<BuildingExpense>;
       planned_works: Table<PlannedWork>;
+      building_billing_settings: Table<BillingSettings & { updated_by: string | null; updated_at: string }>;
       permissions: Table<PermissionRow>;
       notifications: Table<AppNotification>;
       push_subscriptions: Table<PushSubscriptionRow>;
