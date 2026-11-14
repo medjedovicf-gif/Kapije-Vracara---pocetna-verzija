@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { FileText, Paperclip } from 'lucide-react';
+import { Download, FileSpreadsheet, FileText, Paperclip } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import { getMyProfile } from '@/lib/session';
 import type { BuildingExpense, PlannedWork } from '@/lib/types';
@@ -44,7 +44,11 @@ export default async function AdminExpensesPage({ searchParams }: { searchParams
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
         <p className="text-ink-soft text-sm">Ulazne fakture dobavljača i troškovi zgrade.</p>
-        <NewExpenseButton plannedWorks={(works ?? []).filter((w) => w.status !== 'Završeno')} />
+        <div className="flex flex-wrap gap-2">
+          <a href="/admin/finance/export?type=costs&period=year" className="btn btn-outline !px-3.5 !py-2 !text-[12.5px]"><Download size={14} /> Izvezi ({yearKey}.)</a>
+          <Link href="/admin/finance" className="btn btn-outline !px-3.5 !py-2 !text-[12.5px]"><FileSpreadsheet size={14} /> Zbirni izveštaj</Link>
+          <NewExpenseButton plannedWorks={(works ?? []).filter((w) => w.status !== 'Završeno')} />
+        </div>
       </div>
 
       <div className="card !p-0 grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-line mb-5 overflow-hidden">
